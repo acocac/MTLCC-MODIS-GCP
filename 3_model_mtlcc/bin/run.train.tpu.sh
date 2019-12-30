@@ -35,22 +35,16 @@ REFERENCE="MCD12Q1v6stable01to03_LCProp2"
 CELL=(1)
 LAYERS=(1)
 LR=(0.001)
-BS=(8)
-
-NUM_GPUS_IN_MASTER=1
-NUM_GPUS_IN_WORKER=4
-NUM_WORKERS=2
+BS=(32)
 
 gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
-  --module-name trainer.task \
+  --module-name trainer_tpu.task \
   --staging-bucket "${OUTPUT_BUCKET}" \
-  --package-path ./trainer \
+  --package-path ./trainer_tpu \
   --python-version 3.5 \
-  --region "${REGION}" \
+  --region us-central1 \
   --runtime-version 1.14 \
-  --scale-tier "${SCALE_TIER}" \
-  --master-machine-type n1-highmem-8 \
-  --master-accelerator count=$NUM_GPUS_IN_MASTER,type=nvidia-tesla-k80 \
+  --scale-tier BASIC_TPU \
   -- \
   --modeldir "${MODEL_PATH}" \
   --datadir "${INPUT_PATH}" \
@@ -62,22 +56,16 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --convrnn_filters ${CELL} \
   --convrnn_layers ${LAYERS} \
   --learning_rate ${LR} \
+  --tpu \
 
 echo "Upon completion, serve the model by running: bin/run.serve.cloud.sh ${NOW}"
 
-#tesla-t4 tesla-v100
 #  --master-machine-type n1-standard-16 \
 #  --master-accelerator count=$NUM_GPUS_IN_MASTER,type=nvidia-tesla-t4 \
 
 #  --worker-count $NUM_WORKERS \
 #  --worker-machine-type n1-standard-16 \
 #  --worker-accelerator count=$NUM_GPUS_IN_WORKER,type=nvidia-tesla-k80 \
-#  --parameter-server-count 1 \
-#  --parameter-server-machine-type n1-highmem-2 \
-
-#  --worker-count $NUM_WORKERS \
-#  --worker-machine-type n1-highmem-8 \
-#  --worker-accelerator count=$NUM_GPUS_IN_WORKER,type=nvidia-tesla-p100 \
 #  --parameter-server-count 1 \
 #  --parameter-server-machine-type n1-highmem-2 \
 

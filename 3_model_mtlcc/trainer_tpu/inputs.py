@@ -24,9 +24,12 @@ import configparser
 import csv
 import numpy as np
 from tensorflow.python.lib.io import file_io
+import re
 
 from trainer import utils
 from constants.constants import *
+
+from google.cloud import storage
 
 
 def input_fn_train_singleyear(args, mode):
@@ -57,58 +60,61 @@ def input_fn_train_singleyear(args, mode):
   return features, labels
 
 
-def input_fn_train_multiyear(args, mode):
+def input_fn_train_multiyear(args, params, mode):
   """Reads TFRecords and returns the features and labels."""
-  datasets_dict = dict()
 
-  for section in args.train_on.split(' '):
-    datasets_dict[section] = dict()
+  def input_fn(params):
 
-    dataset = Dataset(datadir=args.datadir, verbose=True, temporal_samples=args.temporal_samples, section=section,
-                      experiment=args.experiment, reference=args.reference)
+    datasets_dict = dict()
 
-    if mode == tf.estimator.ModeKeys.TRAIN:
-      partition = TRAINING_IDS_IDENTIFIER
-    elif mode == tf.estimator.ModeKeys.EVAL:
-      partition = TESTING_IDS_IDENTIFIER
-    elif mode == tf.estimator.ModeKeys.PREDICT:
-      partition = EVAL_IDS_IDENTIFIER
+    for section in args.train_on.split(' '):
+      datasets_dict[section] = dict()
 
-    datasets_dict[ section ][ partition ] = dict()
+      dataset = Dataset(datadir=args.datadir, verbose=True, temporal_samples=args.temporal_samples, section=section,
+                        experiment=args.experiment, reference=args.reference)
 
-    # datasets_dict[section][partition] = dict()
-    tfdataset, _, _, filenames = dataset.create_tf_dataset(partition,
-                                                           args.fold,
-                                                           args.batchsize,
-                                                           prefetch_batches=args.prefetch,
-                                                           num_batches=args.limit_batches)
+      if mode == tf.estimator.ModeKeys.TRAIN:
+        partition = TRAINING_IDS_IDENTIFIER
+      elif mode == tf.estimator.ModeKeys.EVAL:
+        partition = TESTING_IDS_IDENTIFIER
+      elif mode == tf.estimator.ModeKeys.PREDICT:
+        partition = EVAL_IDS_IDENTIFIER
+
+      datasets_dict[ section ][ partition ] = dict()
+
+      # datasets_dict[section][partition] = dict()
+      tfdataset, _, _, filenames = dataset.create_tf_dataset(partition,
+                                                             args.fold,
+                                                             args.batchsize,
+                                                             prefetch_batches=args.prefetch,
+                                                             num_batches=args.limit_batches)
+
+      # iterator = tfdataset.dataset.make_one_shot_iterator()
+      datasets_dict[section][partition]["tfdataset"] = tfdataset
+
+    if len(args.train_on.split(' ')) > 1:
+
+      ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
+
+      for section in args.train_on.split(' ')[1:]:
+        ds = ds.concatenate(datasets_dict[section][partition]["tfdataset"])
+
+    else:
+      ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
 
     # iterator = tfdataset.dataset.make_one_shot_iterator()
-    datasets_dict[section][partition]["tfdataset"] = tfdataset
+    # iterator = tf.compat.v1.data.make_initializable_iterator(ds)
+    # # #
+    # tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
+    #
+    # features, labels = iterator.get_next()
+    # # print(features, labels)
+    # return features, labels
 
-  if len(args.train_on.split(' ')) > 1:
+    ##MULTI-GPU
+    return ds
 
-    ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
-
-    for section in args.train_on.split(' ')[1:]:
-      ds = ds.concatenate(datasets_dict[section][partition]["tfdataset"])
-
-  else:
-    ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
-
-  #IF LOCAL
-  # iterator = tfdataset.dataset.make_one_shot_iterator()
-  # iterator = tf.compat.v1.data.make_initializable_iterator(ds)
-  # # #
-  # tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
-  #
-  # features, labels = iterator.get_next()
-  # # print(features, labels)
-  # return features, labels
-
-  ##ESTIMATOR GCLOUD
-  return ds
-
+  return input_fn
 
 def input_fn_eval(args, mode):
   """Reads TFRecords and returns the features and labels."""
@@ -1067,18 +1073,20 @@ class Dataset():
       raise ValueError("please provide valid partition (train|test|eval)")
 
   def create_tf_dataset(self, partition, fold, batchsize, prefetch_batches=None, num_batches=-1, threads=8,
-                        drop_remainder=False, overwrite_ids=None):
+                        drop_remainder=True, overwrite_ids=None):
 
     # set of ids as present in database of given partition (train/test/eval) and fold (0-9)
     allids = self.get_ids(partition=partition, fold=fold)
 
     # set of ids present in local folder (e.g. 1.tfrecord)
     # tiles = os.listdir(self.datadir)
-    tiles = file_io.get_matching_files(os.path.join(self.datadir, '*.gz'))
-    tiles = [os.path.basename(t) for t in tiles]
+    blobs = list_blobs(self.datadir)  # gcp
+    tiles = [b.name for b in blobs]  # gcp
+    tiles = [os.path.basename(t) for t in tiles]  # gcp
 
     if tiles[0].endswith(".gz"):
       compression = "GZIP"
+      #            ext = ".tfrecord.gz"
       ext = ".gz"
     else:
       compression = ""
@@ -1112,7 +1120,6 @@ class Dataset():
       # indices
       if self.experiment == "indices" or self.experiment == "all": feature = self.addIndices(feature)
       if self.experiment == "evi2": feature = self.addIndices250m(feature)
-
       # perform data normalization [0,1000] -> [0,1]
       if self.experiment == "bands250m": feature = self.normalize_bands250m(feature)
       if self.experiment == "bands": feature = self.normalize_bands(feature)
@@ -1148,7 +1155,10 @@ class Dataset():
 
       # perform data augmentation
       if self.augment: feature = self.augment(feature)
-
+      # flatten for tempCNN
+      # if self.tempCNN: feature = self.
+      # replace potentially non sequential labelids with sequential dimension ids
+      # feature = self.transform_labels(feature)
       if self.step == "training": feature = self.transform_labels_training(feature)
       if not self.step == "training": feature = self.transform_labels_evaluation(feature)
 
@@ -1169,16 +1179,39 @@ class Dataset():
     dataset = dataset.repeat()
 
     if drop_remainder:
-      dataset = dataset.apply(tf.data.batch_and_drop_remainder(int(batchsize)))
+      # dataset = dataset.apply(tf.data.batch_and_drop_remainder(int(batchsize))) #tpu
+      dataset = dataset.batch(int(batchsize), drop_remainder=True)
+
     else:
       dataset = dataset.batch(int(batchsize))
 
     if prefetch_batches is not None:
       dataset = dataset.prefetch(prefetch_batches)
 
-    # model shapes are expected shapes of the data stacked as batch
+    # modelshapes are expected shapes of the data stacked as batch
     output_shape = []
     for shape in self.expected_shapes:
       output_shape.append(tf.TensorShape((batchsize,) + shape))
 
     return dataset, output_shape, self.expected_datatypes, filenames
+
+
+def list_blobs(path):  # gcp
+  """Lists all the blobs in the bucket."""
+  storage_client = storage.Client()
+
+  bucket_name, prefix = _split_gcs_path(path)
+
+  bucket = storage_client.get_bucket(bucket_name)
+
+  blobs = bucket.list_blobs(prefix=prefix)
+
+  return (blobs)
+
+
+def _split_gcs_path(path):  # gcp
+  m = re.search('gs://([a-z0-9-_.]*)/(.*)', path, re.IGNORECASE)
+  if not m:
+    raise ValueError('\'{}\' is not a valid GCS path'.format(path))
+
+  return m.groups()

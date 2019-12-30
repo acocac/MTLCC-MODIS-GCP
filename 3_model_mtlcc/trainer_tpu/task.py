@@ -17,6 +17,8 @@ import json
 import functools
 import time
 
+#TODO
+## Fix parms model error
 
 def get_trial_id():
     """Returns the trial id if it exists, else "0"."""
@@ -72,6 +74,9 @@ def parse_arguments(argv):
   parser.add_argument('--convrnn_layers', type=int, default=1,
                       help="number of convolutional recurrent layers")
   parser.add_argument('-step', '--step', type=str, default="training", help='step')
+  parser.add_argument('-tpu','--tpu',action='store_true',help='Whether to use TPU.')
+  parser.add_argument('-iterations', '--iterations', type=int, default=500, help='Number of iterations per TPU training loop.')
+  parser.add_argument('-params', '--params', type=dict, help='params TPU')
 
   args, _ = parser.parse_known_args(args=argv[1:])
   return args
@@ -93,51 +98,46 @@ def train_and_evaluate(args):
         num_samples_test_out, _ = inputs.input_filenames(args, mode=tf.estimator.ModeKeys.EVAL)
         num_samples_test += len(num_samples_test_out) * len(args.train_on.split(' '))
 
-    train_steps = num_samples_train / args.batchsize * args.epochs
-    test_steps = num_samples_test / args.batchsize
-    ckp_steps = num_samples_train / args.batchsize
+    train_steps = int(num_samples_train / args.batchsize * args.epochs)
+    test_steps = int(num_samples_test / args.batchsize)
+    ckp_steps =  int(num_samples_train / args.batchsize)
 
     train_input_fn = functools.partial(
         inputs.input_fn_train_multiyear,
-        args,
+        args, args.params,
         mode=tf.estimator.ModeKeys.TRAIN
     )
 
-    hook = tf.train.ProfilerHook(save_steps=ckp_steps,
-                                 output_dir=os.path.join(args.modeldir,get_trial_id()),
-                                 show_memory=True)
-
-    train_spec = tf.estimator.TrainSpec(
-        train_input_fn,
-        max_steps=train_steps,
-        hooks=[hook])
-
     eval_input_fn = functools.partial(
         inputs.input_fn_train_multiyear,
-        args,
+        args, params,
         mode=tf.estimator.ModeKeys.EVAL
     )
 
-    eval_spec = tf.estimator.EvalSpec(
-        eval_input_fn,
-        start_delay_secs=0,
-        throttle_secs=1,  # eval no more than every x seconds
-        steps=test_steps, # evals on x batches        steps=test_steps, # evals on x batches
-        name='eval'
-    )
+    #
+    # session_config = tf.compat.v1.ConfigProto(
+    #     inter_op_parallelism_threads=0,
+    #     intra_op_parallelism_threads=0,
+    #     allow_soft_placement=True,
+    #     gpu_options=tf.compat.v1.GPUOptions(allow_growth=True))
 
-    session_config = tf.compat.v1.ConfigProto(
-        inter_op_parallelism_threads=0,
-        intra_op_parallelism_threads=0,
-        allow_soft_placement=True,
-        gpu_options=tf.compat.v1.GPUOptions(allow_growth=True))
+    train_distribution_strategy = tf.contrib.distribute.MirroredStrategy(devices=None)
+    eval_distribution_strategy = tf.contrib.distribute.MirroredStrategy(devices=None)
 
-    ##TODO distribution_strategy working with beta variables
-    # train_distribution_strategy = tf.contrib.distribute.MirroredStrategy(devices=None)
+    # distribution = tf.contrib.distribute.MirroredStrategy()
+    # multiworker_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
 
-    run_config = tf.estimator.RunConfig(
+    # Resolve TPU cluster and runconfig for this.
+    tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(None)
+
+    run_config = tf.contrib.tpu.RunConfig(
+        # save_checkpoints_steps=args.save_frequency,
+        # save_summary_steps=args.summary_frequencargsy,
+        cluster=tpu_cluster_resolver,
+        tpu_config=tf.contrib.tpu.TPUConfig(args.iterations),
+        session_config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True),
         # train_distribute=train_distribution_strategy,
-        session_config=session_config,
+        # eval_distribute=eval_distribution_strategy,
         save_checkpoints_steps=ckp_steps,
         save_summary_steps=ckp_steps,
         keep_checkpoint_max=args.max_models_to_keep,
@@ -146,14 +146,37 @@ def train_and_evaluate(args):
         log_step_count_steps=args.summary_frequency # set the frequency of logging steps for loss function
     )
 
-    estimator = model.build_estimator(run_config)
+    estimator = tf.contrib.tpu.TPUEstimator(
+        model_fn= model._model_fn,
+        config=run_config,
+        use_tpu=args.tpu,
+        train_batch_size=args.batchsize,
+        eval_batch_size=args.batchsize,
+    )
+
+    # estimator = model.build_estimator(run_config)
 
     start_train_time = time.time()
-    tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+
+    estimator.train(
+        input_fn=train_input_fn,
+        max_steps=train_steps)
+
+    result = estimator.evaluate(
+        input_fn=eval_input_fn,
+        max_steps=test_steps)
+
     train_time = round(time.time() - start_train_time, 2)
 
     print('Training time (s): ', train_time)
 
+    output_eval_file = os.path.join(args.modeldir,get_trial_id(), "eval_results.txt")
+
+    with tf.gfile.GFile(output_eval_file, "w") as writer:
+        tf.logging.info("***** Eval results *****")
+        for key in sorted(result.keys()):
+            tf.logging.info("  %s = %s", key, str(result[key]))
+            writer.write("%s = %s\n" % (key, str(result[key])))
 
 def main():
 

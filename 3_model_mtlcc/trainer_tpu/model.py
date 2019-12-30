@@ -1,10 +1,30 @@
+# Copyright 2019 Google Inc. All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Defines the model for product recommendation."""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import json
+import os
+
 import tensorflow as tf
+import sys
 import os
 import configparser
+import functools
 from tensorflow.python.lib.io import file_io
 
 from constants.constants import *
@@ -69,12 +89,20 @@ tf.app.flags.DEFINE_string('dataset', '', 'dataset')
 tf.app.flags.DEFINE_string('writetiles', '', 'writetiles')
 tf.app.flags.DEFINE_string('writeconfidences', '', 'writeconfidences')
 tf.app.flags.DEFINE_string('step', '', 'step')
+# tf.app.flags.DEFINE_string('tpu', '', 'tpu')
+tf.app.flags.DEFINE_bool("tpu", True, "Use TPUs rather than plain CPUs")
+tf.app.flags.DEFINE_string('iterations', '', 'iterations')
+tf.app.flags.DEFINE_string('params', '', 'params')
+
+# tf.app.flags.DEFINE_string('allow_growth', '', 'allow_growth')
 
 FLAGS = tf.app.flags.FLAGS
 
 MODEL_CFG_FILENAME = 'params.ini'
 
-ADVANCED_SUMMARY_COLLECTION_NAME="advanced_summaries"
+#TODO
+###optimizer: error betas
+##check SyncReplicasOptimizer
 
 def inference(input, is_train=True, num_classes=None):
     x, sequence_lengths = input
@@ -101,6 +129,7 @@ def inference(input, is_train=True, num_classes=None):
     # use the cell state as featuremap for the classification step
     # cell state has dimensions (b,h,w,d) -> classification strategy
     if FLAGS.aggr_strat == 'state':
+
         class_input = state  # shape (b,h,w,d)
         classkernel = eval(FLAGS.classkernel)
         logits = conv_bn_relu(input=class_input, is_train=is_train, filter=num_classes,
@@ -123,7 +152,6 @@ def inference(input, is_train=True, num_classes=None):
             # average logit scores at each observation
             # (b,t,h,w,d) -> (b,h,w,d)
             logits = tf.reduce_mean(logits, axis=1)
-
         elif FLAGS.aggr_strat == 'sum_output':
             # summarize logit scores at each observation
             # the softmax normalization later will normalize logits again
@@ -152,20 +180,25 @@ def loss(logits, labels, mask, name):
 
 def optimize(loss, global_step, name):
     lr = tf.compat.v1.placeholder_with_default(FLAGS.learning_rate, shape=(), name="learning_rate")
-    beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
-    beta2 = tf.compat.v1.placeholder_with_default(FLAGS.beta2, shape=(), name="beta2")
+    # beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
+    # beta2 = tf.compat.v1.placeholder_with_default(FLAGS.beta2, shape=(), name="beta2")
+    #
+    # optimizer =  tf.compat.v1.train.AdamOptimizer(
+    #     learning_rate=lr, beta1=beta1, beta2=beta2,
+    #     epsilon=FLAGS.epsilon
+    # )
 
-    optimizer = tf.compat.v1.train.AdamOptimizer(
-        learning_rate=lr, beta1=beta1, beta2=beta2,
-        epsilon=FLAGS.epsilon
-    )
+    optimizer =  tf.compat.v1.train.AdamOptimizer(
+        learning_rate=0.01)
+
+    optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 
     # method 1
     update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
         return optimizer.minimize(loss, global_step=global_step, name=name)
 
-    #method 2 - slower source: https://github.com/tensorflow/tensorflow/issues/25057
+    #method 2 - source: https://github.com/tensorflow/tensorflow/issues/25057
     # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     # minimize_op = optimizer.minimize(loss=loss, global_step=global_step,name=name)
     # train_op = tf.group(minimize_op, update_ops)
@@ -178,44 +211,54 @@ def eval_oa(logits, labels, mask):
     predictions = tf.argmax(prediction_scores, 3, name="predictions")
 
     targets = tf.argmax(labels, 3, name="targets")
-
+    # correctly_predicted = tf.equal(predictions, targets, name="correctly_predicted")
     correctly_predicted = tf.equal(tf.boolean_mask(predictions, mask), tf.boolean_mask(targets, mask),
                                    name="correctly_predicted")
-
     overall_accuracy = tf.reduce_mean(tf.cast(correctly_predicted, tf.float32), name="overall_accuracy")
 
     ###Single-GPU
-    overall_accuracy_sum = tf.Variable(tf.zeros(shape=([]), dtype=tf.float32),
-                                       trainable=False,
-                                       name="overall_accuracy_result",
-                                       collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
-                                       )
-
-    ###Multi-GPU
     # overall_accuracy_sum = tf.Variable(tf.zeros(shape=([]), dtype=tf.float32),
     #                                    trainable=False,
     #                                    name="overall_accuracy_result",
-    #                                    aggregation=tf.VariableAggregation.SUM,
     #                                    collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
     #                                    )
+
+    ###Multi-GPU
+    overall_accuracy_sum = tf.Variable(tf.zeros(shape=([]), dtype=tf.float32),
+                                       trainable=False,
+                                       name="overall_accuracy_result",
+                                       aggregation=tf.VariableAggregation.SUM,
+                                       collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
+                                       )
 
     update_op =  tf.compat.v1.assign_add(overall_accuracy_sum, overall_accuracy)
 
     return(overall_accuracy, update_op)
 
+def metric_fn(logits, labels):
+    """Function to return metrics for evaluation."""
+
+    predicted_classes = tf.argmax(logits, 1)
+    accuracy = tf.metrics.accuracy(labels=labels,
+                                   predictions=predicted_classes,
+                                   name="acc_op")
+    return {"accuracy": accuracy}
 
 def summary(metric_op, loss_op):
     """
-    minimal summaries for training @ monitoring
+    minimial summaries for training @ monitoring
     """
 
     tf.compat.v1.summary.scalar("accuracy", metric_op)
     tf.compat.v1.summary.scalar("loss", loss_op)
+    ## histograms
 
     return tf.compat.v1.summary.merge_all()
 
 
 def input(features, labels):
+    # output_shapes = tf.placeholder_with_default(output_shapes, [6], name="data_shapes")
+    # os = [tf.TensorShape(s) for s in output_shapes]
 
     with tf.name_scope("raw"):
         x250, x500, doy, year = features
@@ -254,6 +297,8 @@ def input(features, labels):
         t = tf.shape(x250)[1]
         px = tf.shape(x250)[2]
 
+        # b,t,w,h,d = x250.shape()
+
         x500 = tf.identity(resize(x500, px, px), name="x500")
 
         tf.compat.v1.add_to_collection(ADVANCED_SUMMARY_COLLECTION_NAME, tf.identity(x250, name="x250"))
@@ -270,14 +315,23 @@ def input(features, labels):
         depth = FLAGS.num_bands_250m + FLAGS.num_bands_500m + 2  # doy and year
 
         # dynamic shapes. Fill for debugging
+
         x.set_shape([None, None, FLAGS.pix250m, FLAGS.pix250m, depth])
         y.set_shape((None, None, FLAGS.pix250m, FLAGS.pix250m))
         sequence_lengths.set_shape(None)
+
+        #
+        # x.set_shape([None, None, None, None, depth])
+        # y.set_shape((None, None, None, None))
+        # sequence_lengths.set_shape(None)
 
     return (x, sequence_lengths), (y,)
 
 
 def input_eval(features):
+    # output_shapes = tf.placeholder_with_default(output_shapes, [6], name="data_shapes")
+    # os = [tf.TensorShape(s) for s in output_shapes]
+
     with tf.name_scope("raw"):
         x250, x500, doy, year = features
 
@@ -286,8 +340,9 @@ def input_eval(features):
         doy = tf.cast(doy, tf.float32, name="doy")
         year = tf.cast(year, tf.float32, name="year")
 
-    # integer sequence lengths per batch for dynamic_rnn masking
-    sequence_lengths = tf.reduce_sum(tf.cast(x250[:, :, 0, 0, 0] > 0, tf.int32), axis=1,
+    # integer sequence lenths per batch for dynamic_rnn masking
+    # sequence_lengths = tf.placeholder(dtype=tf.int32, shape=[tf.shape(x250)[0]], name='sequence_lengths'),
+    sequence_lengths = tf.reduce_sum(tf.cast(x250[ :, :, 0, 0, 0 ] > 0, tf.int32), axis=1,
                                                 name="sequence_lengths")
 
     def resize(tensor, new_height, new_width):
@@ -313,6 +368,8 @@ def input_eval(features):
         t = tf.shape(x250)[1]
         px = tf.shape(x250)[2]
 
+        # b,t,w,h,d = x250.shape()
+
         x500 = tf.identity(resize(x500, px, px), name="x500")
 
         tf.compat.v1.add_to_collection(ADVANCED_SUMMARY_COLLECTION_NAME, tf.identity(x250, name="x250"))
@@ -329,6 +386,7 @@ def input_eval(features):
         depth = FLAGS.num_bands_250m + FLAGS.num_bands_500m + 2  # doy and year
 
         # dynamic shapes. Fill for debugging
+
         x.set_shape([None, None, FLAGS.pix250m, FLAGS.pix250m, depth])
         sequence_lengths.set_shape(None)
 
@@ -370,10 +428,25 @@ def _model_fn(features, labels, mode, params):
       predictions = {
           "pred": pred,
           "pred_sc": prediction_scores}
+      #
+      # predictions = {
+      #     "classes": tf.argmax(input=logits, axis=1),
+      #     "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
+      # }
+      # prediction_output = tf.estimator.export.PredictOutput({"classes": tf.cast(tf.argmax(input=logits, axis=3), tf.int64),
+      #                                                        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")})
+      #
+      # return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions,
+      #   export_outputs={tf.saved_model.DEFAULT_SERVING_SIGNATURE_DEF_KEY: prediction_output})
 
-      return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+      # prediction_scores = tf.nn.softmax(logits=logits, name="prediction_scores")
+      # predictions = tf.argmax(prediction_scores, 3, name="predictions")
+
+      # return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+      return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions)
 
   else:
+      # input pipeline
       with tf.name_scope("input"):
           (x, sequence_lengths), (alllabels,) = input(features, labels)
           alllabels = alllabels
@@ -395,18 +468,22 @@ def _model_fn(features, labels, mode, params):
 
       global_step = tf.compat.v1.train.get_or_create_global_step()
 
-      loss_op = loss(logits=logits, labels=labels, mask=not_unknown_mask, name="loss")
-
+      loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
+                    logits=logits, labels=labels))
+      # loss_op = loss(logits=logits, labels=labels, mask=not_unknown_mask, name="loss")
       ao_ops = eval_oa(logits=logits, labels=labels, mask=not_unknown_mask)
       summary(ao_ops[0], loss_op)
 
       if mode == tf.estimator.ModeKeys.EVAL:
           eval_metric_ops = {"accuracy": ao_ops}
-          return tf.estimator.EstimatorSpec(mode, loss=loss_op, eval_metric_ops=eval_metric_ops)
+          # return tf.estimator.EstimatorSpec(mode, loss=loss_op, eval_metric_ops=eval_metric_ops)
+          return tf.contrib.tpu.TPUEstimatorSpec(mode, loss=loss_op, eval_metric_ops=eval_metric_ops)
+          # return tf.estimator.EstimatorSpec(mode, loss=loss_op)
 
       elif mode == tf.estimator.ModeKeys.TRAIN:
           print("building optimizer...")
           train_op = optimize(loss_op, global_step, name="train_op")
+
           logging_hook = tf.estimator.LoggingTensorHook({"accuracy": ao_ops[0], 'loss': loss_op,  'global_step': global_step}, every_n_iter=64)
 
           # write FLAGS to file
@@ -425,10 +502,14 @@ def _model_fn(features, labels, mode, params):
           with file_io.FileIO(path, 'w') as configfile:  # gcp
               cfg.write(configfile)
 
-          return tf.estimator.EstimatorSpec(mode=mode, loss=loss_op, train_op=train_op, training_hooks=[logging_hook])
+          # return tf.estimator.EstimatorSpec(mode=mode, loss=loss_op, train_op=train_op, training_hooks=[logging_hook])
+          return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, loss=loss_op, train_op=train_op, training_hooks=[logging_hook])
+          # return tf.estimator.EstimatorSpec(mode=mode, loss=loss_op, train_op=train_op)
 
       else:
           raise NotImplementedError('Unknown mode {}'.format(mode))
+
+  # return tf.estimator.EstimatorSpec(mode, loss=loss_op)
 
 
 def convrnn_layer(input, filter, is_train=True, kernel=FLAGS.convrnn_kernel, sequence_lengths=None, bidirectional=True,
@@ -449,6 +530,8 @@ def convrnn_layer(input, filter, is_train=True, kernel=FLAGS.convrnn_kernel, seq
             cell = utils.ConvGRUCell((px, px), filter, kernel, activation=tf.nn.tanh,
                                        normalize=FLAGS.convrnn_normalize)
 
+            # tf.Variable(tf.zeros((b,h,w)), validate_shape=False, trainable=False, name="zero_state")
+            # zero_state = tf.Variable(tf.zeros((None, None, None), tf.float32), trainable=False)
         elif convcell == 'lstm':
             cell = utils.ConvLSTMCell((px, px), filter, kernel, activation=tf.nn.tanh,
                                         normalize=FLAGS.convrnn_normalize, peephole=FLAGS.peephole)
@@ -475,7 +558,8 @@ def convrnn_layer(input, filter, is_train=True, kernel=FLAGS.convrnn_kernel, seq
                     c=tf.concat((fw_final.c, bw_final.c), -1),
                     h=tf.concat((fw_final.h, bw_final.h), -1)
                 )
-
+                # else:
+                #    concat_final_state = tf.concat((fw_final,bw_final),-1)
         else:
             concat_outputs, concat_final_state = tf.nn.dynamic_rnn(cell=cell, inputs=input,
                                                                    sequence_length=sequence_lengths,
@@ -505,8 +589,8 @@ def conv_bn_relu(var_scope="name_scope", is_train=True, **kwargs):
 
         is_train = tf.constant(is_train, dtype=tf.bool)
         x = conv_layer(**kwargs)
-        # x = Batch_Normalization(x, is_train, "bn") #deprecated replaced by keras API BN
-        bn = tf.keras.layers.BatchNormalization(momentum=0.9, scale=True, center=True, moving_mean_initializer='zeros') #source https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/blogs/batch_normalization/mnist_classifier/trainer/model.py
+        # x = Batch_Normalization(x, is_train, "bn")
+        bn = tf.keras.layers.BatchNormalization(momentum=0.90) #source https://github.com/GoogleCloudPlatform/training-data-analyst/blob/master/blogs/batch_normalization/mnist_classifier/trainer/model.py
         x = bn(x, training=is_train)
         x = activation_function(x)
 
@@ -563,10 +647,11 @@ def pad(input, kernel, dilation, padding="REFLECT"):
 def build_estimator(run_config):
     """Returns TensorFlow estimator."""
 
-    estimator = tf.estimator.Estimator(
-        model_fn=_model_fn,
-        config=run_config,
-        params=run_config,
+    estimator = tf.contrib.tpu.TPUEstimator(
+        model_fn =_model_fn,
+        config = run_config,
+        params = run_config,
+        use_tpu= FLAGS.tpu
     )
 
     return estimator

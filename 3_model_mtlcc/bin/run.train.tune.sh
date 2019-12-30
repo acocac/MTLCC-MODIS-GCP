@@ -6,10 +6,10 @@ NOW="$(get_date_time)"
 INPUT_BUCKET="gs://${BUCKET_NAME}"
 OUTPUT_BUCKET="gs://${BUCKET_NAME}"
 TRAINING_JOB_NAME="${PROJECT}_hpt_train_${NOW}"
-INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/gz/${PZISE_train}/multiple"
+INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/${PZISE_train}/multiple"
 MODEL_PATH="${OUTPUT_BUCKET}/${TRAINING_JOB_NAME}"
-EPOCHS=2
-TRAIN_YEAR='2003'
+EPOCHS=5
+TRAIN_YEAR='2002'
 
 gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --module-name trainer.task \
@@ -19,7 +19,8 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --runtime-version 1.14 \
   --config ${HPTUNING_CONFIG} \
   --scale-tier "${SCALE_TIER}" \
-  --master-machine-type "${MASTER_MACHINE}" \
+  --master-machine-type n1-highmem-8 \
+  --master-accelerator count=$NUM_GPUS_IN_MASTER,type=nvidia-tesla-p100 \
   -- \
   --modeldir "${MODEL_PATH}" \
   --datadir "${INPUT_PATH}" \

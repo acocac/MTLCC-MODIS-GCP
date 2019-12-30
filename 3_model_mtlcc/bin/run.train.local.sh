@@ -26,15 +26,15 @@
 INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_train}/multiple"
 MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud"
 
-EPOCHS=5
-TRAIN_YEAR='2001 2002 2003'
+EPOCHS=1
+TRAIN_YEAR='2001'
 #TRAIN_YEAR=(2015)
 REFERENCE="MCD12Q1v6stable01to03_LCProp2"
 
-CELL=(64)
+CELL=(128)
 LAYERS=(1)
 LR=(0.01)
-BS=(16)
+BS=(32)
 
 mkdir -p "${MODEL_DIR}/_logs"
 logfname="${MODEL_DIR}/_logs/log.log"
