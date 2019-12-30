@@ -23,42 +23,42 @@
 
 . ./bin/_common.sh
 
-#MODEL_DIR=./sample/model
-#INPUT_PATH=./sample/data/gz/${PZISE}/multiple
-#INPUT_PATH="F:/acoca/research/gee/dataset/AMZ/MOD09_250m500m/gz/${PZISE_eval}/multiple"
-INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_eval}/multiple"
-MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/t2003_1to18"
-STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/t2003_1to18"
-REFERENCE="MCD12Q1v6stable01to18_LCProp2"
-
-EPOCHS=20
-YEAR=(2001)
-
+REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
+YEARS=(2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018)
+BS=1
 CELL=(64)
 LAYERS=(1)
 LR=(0.01)
-BS=(1)
 
-mkdir -p "E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs"
-logfname="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/log.log"
+for reference in ${REFERENCES[@]}; do
 
-gcloud ai-platform local train \
-  --module-name trainer.eval \
-  --package-path trainer \
-  -- \
-  --modeldir "${MODEL_DIR}" \
-  --datadir "${INPUT_PATH}" \
-  --storedir "${STORE_DIR}/${YEAR}" \
-  --dataset "${YEAR}" \
-  --reference ${REFERENCE} \
-  --epochs "${EPOCHS}" \
-  --pix250m "${PZISE_eval}" \
-  --convrnn_filters ${CELL} \
-  --convrnn_layers ${LAYERS} \
-  --learning_rate "${LR}" \
-  --writetiles \
-  --writeconfidences \
-  --step 'evaluation' \
-  --batchsize ${BS} > $logfname 2>&1
+    INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_eval}/multiple"
+    MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/t2001-2003_1to3"
+    STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/t2001-2003_1to3"
 
-echo "Upon completion, serve the model by running: bin/run.serve.local.sh"
+    for year in ${YEARS[@]}; do
+        echo "Processing project: $PROJECT and year: $year and reference: $reference"
+
+        mkdir -p "E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference"
+        logfname="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference/$year.log"
+
+        gcloud ai-platform local train \
+          --module-name trainer.eval \
+          --package-path trainer \
+          -- \
+          --modeldir "${MODEL_DIR}" \
+          --datadir "${INPUT_PATH}" \
+          --storedir "${STORE_DIR}/${year}" \
+          --dataset "${year}" \
+          --reference ${reference} \
+          --pix250m "${PZISE_eval}" \
+          --convrnn_filters ${CELL} \
+          --convrnn_layers ${LAYERS} \
+          --learning_rate ${LR} \
+          --writetiles \
+          --step 'evaluation' \
+          --batchsize ${BS} > $logfname 2>&1
+
+    done
+done
+#          --writeconfidences \

@@ -2,12 +2,9 @@
 #!/bin/bash
 
 YEARS=(2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018)
-#YEARS=(2015)
-#PROJECTS=(tile_1_463 tile_0_201 tile_0_143 tile_0_365 tile_1_438 tile_0_630 tile_1_713)
 PROJECTS=(tile_0_563)
 psize=(384)
 RESOLUTIONS=(250m_spectral 250m_aux 500m_spectral) #250m_spectral 250m_aux 500m_spectral
-#RESOLUTIONS=(250m_aux) #250m_spectral 250m_aux 500m_spectral
 storage=(GCloud)
 bucket=('gcptutorials')
 

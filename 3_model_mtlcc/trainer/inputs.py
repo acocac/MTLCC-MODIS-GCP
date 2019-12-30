@@ -24,7 +24,7 @@ import configparser
 import csv
 import numpy as np
 from tensorflow.python.lib.io import file_io
-# from google.cloud import storage
+from google.cloud import storage
 import re
 
 from trainer import utils
@@ -259,6 +259,7 @@ class Dataset():
     # self.classes = [cl.replace("\n","") for cl in f.readlines()]
 
     cfgpath = os.path.join(dataroot, "dataset.ini")
+    print(cfgpath)
     # load dataset configs
     datacfg = configparser.ConfigParser()
     with file_io.FileIO(cfgpath, 'r') as f:  # gcp
@@ -1070,10 +1071,10 @@ class Dataset():
     allids = self.get_ids(partition=partition, fold=fold)
 
     # set of ids present in local folder (e.g. 1.tfrecord)
-    tiles = os.listdir(self.datadir)
-    # blobs = list_blobs(self.datadir)  # gcp
-    # tiles = [b.name for b in blobs]  # gcp
-    # tiles = [os.path.basename(t) for t in tiles]  # gcp
+    # tiles = os.listdir(self.datadir)
+    blobs = list_blobs(self.datadir)  # gcp
+    tiles = [b.name for b in blobs]  # gcp
+    tiles = [os.path.basename(t) for t in tiles]  # gcp
 
     if tiles[0].endswith(".gz"):
       compression = "GZIP"

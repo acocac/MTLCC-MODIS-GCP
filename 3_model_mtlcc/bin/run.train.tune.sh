@@ -6,10 +6,10 @@ NOW="$(get_date_time)"
 INPUT_BUCKET="gs://${BUCKET_NAME}"
 OUTPUT_BUCKET="gs://${BUCKET_NAME}"
 TRAINING_JOB_NAME="${PROJECT}_hpt_train_${NOW}"
-INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/${PZISE_train}/multiple"
+INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/gz/${PZISE_train}/multiple"
 MODEL_PATH="${OUTPUT_BUCKET}/${TRAINING_JOB_NAME}"
 EPOCHS=2
-TRAIN_YEAR=2015
+TRAIN_YEAR='2003'
 
 gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --module-name trainer.task \
