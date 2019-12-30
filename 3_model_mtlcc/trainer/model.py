@@ -171,18 +171,28 @@ def loss(logits, labels, mask, name):
 
 def optimize(loss, global_step, name):
     lr = tf.compat.v1.placeholder_with_default(FLAGS.learning_rate, shape=(), name="learning_rate")
-    beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
-    beta2 = tf.compat.v1.placeholder_with_default(FLAGS.beta2, shape=(), name="beta2")
+    # beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
+    # beta2 = tf.compat.v1.placeholder_with_default(FLAGS.beta2, shape=(), name="beta2")
+    #
+    # optimizer =  tf.compat.v1.train.AdamOptimizer(
+    #     learning_rate=lr, beta1=beta1, beta2=beta2,
+    #     epsilon=FLAGS.epsilon
+    # )
 
     optimizer =  tf.compat.v1.train.AdamOptimizer(
-        learning_rate=lr, beta1=beta1, beta2=beta2,
-        epsilon=FLAGS.epsilon
-    )
+        learning_rate=lr)
 
-    up_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
-    with tf.control_dependencies(up_ops):
+    #method 1
+    update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
         return optimizer.minimize(loss, global_step=global_step, name=name)
 
+    #method 2 - source: https://github.com/tensorflow/tensorflow/issues/25057
+    # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    # minimize_op = optimizer.minimize(loss=loss, global_step=global_step,name=name)
+    # train_op = tf.group(minimize_op, update_ops)
+
+    # return train_op
 
 def eval_oa(logits, labels, mask):
 
@@ -195,10 +205,18 @@ def eval_oa(logits, labels, mask):
                                    name="correctly_predicted")
     overall_accuracy = tf.reduce_mean(tf.cast(correctly_predicted, tf.float32), name="overall_accuracy")
 
+    # overall_accuracy_sum = tf.Variable(tf.zeros(shape=([]), dtype=tf.float32),
+    #                                    trainable=False,
+    #                                    name="overall_accuracy_result",
+    #                                    collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
+    #                                    )
+
     overall_accuracy_sum = tf.Variable(tf.zeros(shape=([]), dtype=tf.float32),
                                        trainable=False,
                                        name="overall_accuracy_result",
-                                       collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES])
+                                       aggregation=tf.VariableAggregation.SUM,
+                                       collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES]
+                                       )
 
     update_op =  tf.compat.v1.assign_add(overall_accuracy_sum, overall_accuracy)
 
@@ -428,7 +446,9 @@ def _model_fn(features, labels, mode, params):
 
       global_step = tf.compat.v1.train.get_or_create_global_step()
 
-      loss_op = loss(logits=logits, labels=labels, mask=not_unknown_mask, name="loss")
+      loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(
+          labels=labels, logits=logits))
+      # loss_op = loss(logits=logits, labels=labels, mask=not_unknown_mask, name="loss")
       ao_ops = eval_oa(logits=logits, labels=labels, mask=not_unknown_mask)
       summary(ao_ops[0], loss_op)
 

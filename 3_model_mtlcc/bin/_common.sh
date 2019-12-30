@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCALE_TIER="CUSTOM"
-MASTER_MACHINE="standard_gpu"
+MASTER_MACHINE="complex_model_m_gpu"
 MODEL_NAME="mtlcc"
 HPTUNING_CONFIG="trainer/hptuning_config.yaml"
 BUCKET_NAME="gcptutorials"

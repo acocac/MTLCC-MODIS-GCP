@@ -33,7 +33,7 @@ TRAIN_YEAR='2001'
 REFERENCE="MCD12Q1v6stable01to03_LCProp2"
 
 CELL=(64)
-LAYERS=(1)
+LAYERS=(3)
 LR=(0.001)
 BS=(32)
 
@@ -42,7 +42,7 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --staging-bucket "${OUTPUT_BUCKET}" \
   --package-path ./trainer \
   --region "${REGION}" \
-  --runtime-version 1.14 \
+  --runtime-version 1.15 \
   --scale-tier "${SCALE_TIER}" \
   --master-machine-type "${MASTER_MACHINE}" \
   -- \

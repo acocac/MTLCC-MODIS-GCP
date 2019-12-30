@@ -120,9 +120,14 @@ def train_and_evaluate(args):
         name='eval'
     )
 
+    distribution = tf.contrib.distribute.MirroredStrategy()
+    # multiworker_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+
     run_config = tf.estimator.RunConfig(
         # save_checkpoints_steps=args.save_frequency,
         # save_summary_steps=args.summary_frequency,
+        train_distribute=distribution,
+        # eval_distribute=distribution,
         save_checkpoints_steps=ckp_steps,
         save_summary_steps=ckp_steps,
         keep_checkpoint_max=args.max_models_to_keep,

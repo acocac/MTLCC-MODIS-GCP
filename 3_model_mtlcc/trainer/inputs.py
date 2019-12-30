@@ -98,14 +98,16 @@ def input_fn_train_multiyear(args, mode):
   else:
     ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
 
-  # iterator = tfdataset.dataset.make_one_shot_iterator()
-  iterator = tf.compat.v1.data.make_initializable_iterator(ds)
+  # # iterator = tfdataset.dataset.make_one_shot_iterator()
+  # iterator = tf.compat.v1.data.make_initializable_iterator(ds)
+  # #
+  # tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
   #
-  tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
+  # features, labels = iterator.get_next()
+  #
+  # return features, labels
 
-  features, labels = iterator.get_next()
-
-  return features, labels
+  return ds
 
 
 def input_fn_eval(args, mode):
