@@ -6,15 +6,10 @@ from osgeo import gdal, osr
 from os.path import join
 
 import threading
-from trainer import inputs
-
-#os.environ["GDAL_DATA"] = os.environ["HOME"] + "/.conda/envs/MTLCC/share/gdal"
 
 EVAL_IDS_IDENTIFIER = "eval"
 
 MODEL_CFG_FILENAME = "params.ini"
-
-import numpy as np
 
 # simple flag to track if graph is created in this session or has to be imported
 graph_created_flag = False
@@ -95,7 +90,6 @@ def eval(args):
             print ("Evaluation aborted")
             pass
 
-        #pbar.finish()
 def write_tile(array, datafilename, outfolder, geotransform, srid):
     """gave up for now... wrapper around write_tile_ to implement multithreaded writing"""
     writeargs = (array, datafilename, outfolder, geotransform, srid)
@@ -110,18 +104,8 @@ def write_tile_(array, datafilename, outfolder, geotransform, srid):
 
     outpath = os.path.join(outfolder, tile + ".tif")
 
-    #curs = conn.cursor()
-
-    #sql = "select ST_xmin(geom) as xmin, ST_ymax(geom) as ymax, ST_SRID(geom) as srid from {tiletable} where id = {tileid}".format(
-    #    tileid=tile, tiletable=tiletable)
-    #curs.execute(sql)
-    #xmin, ymax, srid = curs.fetchone()
-
     nx = array.shape[0]
     ny = array.shape[1]
-    #xres = 10
-    #yres = 10
-    #geotransform = (xmin, xres, 0, ymax, 0, -yres)
 
     if array.dtype == int:
         gdaldtype = gdal.GDT_Int16

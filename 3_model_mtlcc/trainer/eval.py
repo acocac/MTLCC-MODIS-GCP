@@ -16,23 +16,11 @@ from . import model
 
 import functools
 
-import logging
-
 from os.path import join
 import threading
 import datetime
 from osgeo import gdal, osr
 import configparser
-
-# Logging - only local
-from pathlib import Path
-Path('results').mkdir(exist_ok=True)
-tf.logging.set_verbosity(logging.INFO)
-handlers = [
-    logging.FileHandler('results/evaluation.log'),
-    logging.StreamHandler(sys.stdout)
-]
-logging.getLogger('tensorflow').handlers = handlers
 
 PREDICTION_FOLDERNAME="prediction"
 CONFIDENCES_FOLDERNAME="confidences"
@@ -112,6 +100,7 @@ def train_and_evaluate(args):
     args.convrnn_layers = cfg['convrnn_layers']
     args.learning_rate = cfg['learning_rate']
 
+    print(args.convrnn_filters, args.convrnn_layers, args.learning_rate)
     run_config = tf.estimator.RunConfig(
         model_dir=args.modeldir,
     )

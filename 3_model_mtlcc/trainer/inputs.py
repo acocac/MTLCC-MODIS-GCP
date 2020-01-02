@@ -96,17 +96,6 @@ def input_fn_train_multiyear(args, mode):
   else:
     ds = datasets_dict[args.train_on.split(' ')[0]][partition]["tfdataset"]
 
-  #IF LOCAL
-  # iterator = tfdataset.dataset.make_one_shot_iterator()
-  # iterator = tf.compat.v1.data.make_initializable_iterator(ds)
-  # # #
-  # tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
-  #
-  # features, labels = iterator.get_next()
-  # # print(features, labels)
-  # return features, labels
-
-  ##ESTIMATOR GCLOUD
   return ds
 
 
@@ -130,21 +119,7 @@ def input_fn_eval(args, mode):
                                                          prefetch_batches=args.prefetch,
                                                          num_batches=args.limit_batches)
 
-  # iterator = tfdataset.dataset.make_one_shot_iterator()
-  iterator = tf.compat.v1.data.make_initializable_iterator(tfdataset)
-  #
-  tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
-
-  features, labels = iterator.get_next()
-
-  if mode == tf.estimator.ModeKeys.PREDICT:
-    # return features
-    return features, labels
-
-  # if mode == tf.estimator.ModeKeys.PREDICT:
-  #   return features, labels, iterator
-
-  return features, labels
+  return tfdataset
 
 
 def input_filenames(args, mode):
@@ -206,9 +181,6 @@ class Dataset():
     self.section = section
     self.step = step
 
-    # if datadir is None:
-    #    dataroot=os.environ["datadir"]
-    # else:
     dataroot = datadir
 
     # csv list of geotransforms of each tile: tileid, xmin, xres, 0, ymax, 0, -yres, srid
@@ -242,30 +214,13 @@ class Dataset():
         self.ids.append(int(id))
         self.classes.append(cl)
 
-    ## create a lookup table to map labelids to dimension ids
-    # # map data ids [0, 2, 4,..., nclasses_originalID]
-    # labids = tf.constant(self.ids, dtype=tf.int64)
-    #
-    # # to dimensions [0, 1, 2, ... nclasses_orderID]
-    # dimids = tf.constant(list(range(0, len(self.ids), 1)), dtype=tf.int64)
-
-    # if self.step == "training":
-    #   self.id_lookup_table = tf.contrib.lookup.HashTable(tf.contrib.lookup.KeyValueTensorInitializer(labids, dimids),
-    #                                                      default_value=-1)
-    #
-    #   self.inverse_id_lookup_table = tf.contrib.lookup.HashTable(
-    #     tf.contrib.lookup.KeyValueTensorInitializer(dimids, labids),
-    #     default_value=-1)
-
-    # self.classes = [cl.replace("\n","") for cl in f.readlines()]
-
     cfgpath = os.path.join(dataroot, "dataset.ini")
     print(cfgpath)
     # load dataset configs
     datacfg = configparser.ConfigParser()
     with file_io.FileIO(cfgpath, 'r') as f:  # gcp
       datacfg.read_file(f)
-    # datacfg.read(cfgpath)
+
     cfg = datacfg[section]
 
     self.tileidfolder = os.path.join(dataroot, "tileids")
@@ -302,16 +257,10 @@ class Dataset():
 
   def transform_labels_training(self, feature):
     """
-    1. take only first labelmap, as labels are not supposed to change
-    2. perform label lookup as stored label ids might be not sequential labelid:[0,3,4] -> dimid:[0,1,2]
+    1. prepare for the estimator
     """
 
     x250, x500, doy, year, labels = feature
-
-    # take first label time [46,24,24] -> [24,24]
-    # labels are not supposed to change over the time series
-    # labels = self.id_lookup_table.lookup(labels)
-    # labels = labels[0]
 
     return (x250, x500, doy, year), labels
 
@@ -368,7 +317,7 @@ class Dataset():
     norm250m = tf.stack(norm250m)
     norm250m = tf.transpose(norm250m, [1, 2, 3, 0])
 
-    # cancel effect 500m
+    # cancel the effect of 500m
     x500 = tf.cast(x500, tf.float32) - tf.cast(x500, tf.float32)
 
     doy = tf.cast(doy, tf.float32) / 365
