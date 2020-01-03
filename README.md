@@ -36,7 +36,7 @@ Contributions via pull requests are welcome. Please make sure that changes pass 
 
 ### Network training and evaluation
 
-### on local machine (requires dependencies installed)
+#### on local machine (requires dependencies installed)
 
 #### train the network graph for 24px tiles
 ```bash
@@ -44,7 +44,7 @@ bash bin/run.train.local.sh
 ```
 
 ### Monitor training/validation curves
-### on local machine (requires dependencies installed)
+#### on local machine (requires dependencies installed)
 
 ```bash
 tensorboard --logdir=.
