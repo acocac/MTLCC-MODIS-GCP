@@ -18,16 +18,18 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 
 ### Instructions
 * Scripts for training and evaluation are provided.
-* The code can be executed after downloading the demo data (available [here](https://drive.google.com/drive/folders/1ljxThnqgeNsnfv_qejI-jE8O4bH9mHkW?usp=sharing)
+* The code can be executed after downloading the demo data (available [here](https://drive.google.com/drive/folders/1ljxThnqgeNsnfv_qejI-jE8O4bH9mHkW?usp=sharing))
 *  After installing the dependencies the python scripts should be executable.
-
-### Dependencies
-Implementations of ConvGRU and ConvLSTM was adapted from https://github.com/carlthome/tensorflow-convlstm-cell and adapted into the trainer/utils.py script.
 
 ### Acknowledgements
 The author acknowledges Marc Rußwurm for a constant feedback of this implementation derived from his original repository. 
 
 This development is part of my on-going PhD titled "Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas" at King's College London supervised by Dr. Mark Mulligan (first supervisor at King's College London) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT).
+
+## Future work
+* Enable TPU-processing, using TPUestimator
+* Improve strategies for multiGPU processing (currently only working with tf.distribute.MirroredStrategy)
+* Fix serving functions for online predictions and integration with Google Earth Engine's ee.Model (further info [here](https://developers.google.com/earth-engine/tensorflow))
 
 ### Contributing
 Contributions via pull requests are welcome. Please make sure that changes pass the unit tests. Any bugs and problems can be reported on the repo's issues page.
@@ -56,7 +58,6 @@ pip install pandas
 pip install configparser
 pip install --upgrade google-api-python-client
 ```
-## Future work
-* Enable TPU-processing, using TPUestimator
-* Improve strategies for multiGPU processing
-* Fix serving functions for online predictions
+
+### Dependencies
+Implementations of ConvGRU and ConvLSTM was adapted from https://github.com/carlthome/tensorflow-convlstm-cell and adapted into the trainer/utils.py script.
