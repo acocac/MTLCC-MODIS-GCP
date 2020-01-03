@@ -1,5 +1,5 @@
 ## MTLCC-MODIS-GCP
-### Multitemporal Land Cover Classification Network (MTLCC) adapted to read MODIS data using tf.Estimator and Google AI SDK
+### Multitemporal Land Cover Classification Network (MTLCC) adapted to MODIS data using tf.Estimator and Google AI SDK
 
 The MTLCC network is a state-of-the-art recurrent neural network approach to encode multi-temporal data for land cover classification.
 
