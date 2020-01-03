@@ -3,14 +3,16 @@
 
 The MTLCC network is a state-of-the-art recurrent neural network approach to encode multi-temporal data for land cover classification.
 
-##### Source code of Rußwurm & Körner (2018)
-
+##### Source code of Rußwurm & Körner's MTLCC network (2018)
 If you use this model consider citing:
 ```
 Rußwurm M., Körner M. (2018). Multi-Temporal Land Cover Classification with
 Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(4),29. https://doi.org/10.3390/ijgi7040129
 
 ```
+##### If you use the MTLCC-MODIS-GCP repository consider citing:
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3597431.svg)](http://doi.org/10.5281/zenodo.3597431)
+
 
 ### Contributions of this repository
 * The MTLCC network reads MODIS 250m/500m surface reflectance time series satellite data and auxiliary datasets (labelled datasets, elevation, climate).
