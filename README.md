@@ -26,7 +26,7 @@ The author acknowledges Marc Rußwurm for a constant feedback of this implementa
 
 This development is part of my on-going PhD titled "Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas" at King's College London supervised by Dr. Mark Mulligan (first supervisor at King's College London) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT).
 
-## Future work
+### Future work
 * Enable TPU-processing, using TPUestimator
 * Improve strategies for multiGPU processing (currently only working with tf.distribute.MirroredStrategy)
 * Fix serving functions for online predictions and integration with Google Earth Engine's ee.Model (further info [here](https://developers.google.com/earth-engine/tensorflow))
