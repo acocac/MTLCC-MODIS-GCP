@@ -1,6 +1,6 @@
 #!/bin/bash
 
-YEARS=(2001)
+YEARS=(2002)
 PROJECTS=(AMZ)
 psize=(384)
 
