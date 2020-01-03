@@ -25,7 +25,7 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 Implementations of ConvGRU and ConvLSTM was adapted from https://github.com/carlthome/tensorflow-convlstm-cell and adapted into the trainer/utils.py script.
 
 ### Acknowledgements
-The author acknowledges Marc Rußwurm for his constant feedback of this implementation derived from the original repository. 
+The author acknowledges Marc Rußwurm for a constant feedback of this implementation derived from his original repository. 
 
 This development is part of my on-going PhD titled "Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas" at King's College London supervised by Dr. Mark Mulligan (first supervisor at King's College London) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT).
 
