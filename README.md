@@ -17,7 +17,7 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 * These datasets can be downloaded from Google Earth Engine using GEE python API (see [0_downloaddata](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/0_downloaddata)) and preprocessed according to the scripts in [1_datapreparation](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/1_datapreparation). 
 * The partitions for training, validating and evaluating the MTLCC model can be generated using the scripts in [2_datapartition](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/2_datapartition).
 * The original `Tensorflow 1.7` repository located at `https://github.com/TUM-LMF/MTLCC` was forked and adapted to TF 1.14 using tf.Estimator and Google AI structure. The structure of the scripts are according to Google AI as can be found in [3_model_mtlcc](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/3_model_mtlcc).
-* Scripts for analysing the results and outputs of the training from Google AI SDK are available in [4_results](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/4_results).
+* Scripts for analysing the results and outputs of the trained models from either Google AI SDK or local training are available in [4_results](https://github.com/acocac/MTLCC-MODIS-GCP/tree/master/4_results).
 
 ### Instructions
 * Scripts for training and evaluation are provided.
