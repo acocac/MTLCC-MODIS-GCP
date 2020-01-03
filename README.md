@@ -14,7 +14,7 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 
 ### Contributions of this repository
 * The original `Tensorflow 1.7` repository located at `https://github.com/TUM-LMF/MTLCC` was forked and adapted to TF 1.14 using tf.Estimator and Google AI structure.
-* The MTLCC network is adapted to read MODIS 250m/500m surface reflectance data.
+* The MTLCC network reads MODIS 250m/500m surface reflectance data.
 
 ### Instructions
 * Scripts for training and evaluation are provided.
@@ -25,10 +25,28 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 Implementations of ConvGRU and ConvLSTM was adapted from https://github.com/carlthome/tensorflow-convlstm-cell and adapted into the trainer/utils.py script.
 
 ### Acknowledgements
-The author acknowledges Marc Rußwurm for his constant feedback of this implementation derived from the original repository.
+The author acknowledges Marc Rußwurm for his constant feedback of this implementation derived from the original repository. 
+
+This development is part of my on-going PhD titled "Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas" at King's College London supervised by Dr. Mark Mulligan (first supervisor at King's College London) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT).
 
 ### Contributing
 Contributions via pull requests are welcome. Please make sure that changes pass the unit tests. Any bugs and problems can be reported on the repo's issues page.
+
+### Network training and evaluation
+
+### on local machine (requires dependencies installed)
+
+#### train the network graph for 24px tiles
+```bash
+bash bin/run.train.local.sh
+```
+
+### Monitor training/validation curves
+### on local machine (requires dependencies installed)
+
+```bash
+tensorboard --logdir=.
+```
 
 Python packages
 ```bash
@@ -38,18 +56,7 @@ pip install pandas
 pip install configparser
 pip install --upgrade google-api-python-client
 ```
-## Network training and evaluation
-
-### on local machine (requires dependencies installed)
-
-#### train the network graph for 24px tiles
-```bash
-bash bin/run.train.local.sh
-```
-
-## Monitor training/validation curves
-### on local machine (requires dependencies installed)
-
-```bash
-tensorboard --logdir=.
-```
+## Future work
+* Enable TPU-processing, using TPUestimator
+* Improve strategies for multiGPU processing
+* Fix serving functions for online predictions
