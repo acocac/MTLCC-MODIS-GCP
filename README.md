@@ -8,7 +8,7 @@ The MTLCC network is a state-of-the-art recurrent neural network approach to enc
 If you use this model consider citing
 ```
 Rußwurm M., Körner M. (2018). Multi-Temporal Land Cover Classification with
-Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(4),29. ![DOI](https://doi.org/10.3390/ijgi7040129)
+Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(4),29. https://doi.org/10.3390/ijgi7040129
 
 ```
 
