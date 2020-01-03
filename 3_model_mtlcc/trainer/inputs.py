@@ -876,7 +876,7 @@ class Dataset():
 
     return x250, x500, doy, year, labels
 
-  def MCD12Q1v6stable01to18_LCProp2(self, feature):
+  def MCD12Q1v6stable01to15_LCProp2(self, feature):
 
     x250, x500, doy, year, labels = feature
 
@@ -1079,7 +1079,7 @@ class Dataset():
       if self.reference == "MCD12Q1v6raw_LCProp2": feature = self.MCD12Q1v6raw_LCProp2(feature)
       if self.reference == "MCD12Q1v6stable_LCType1": feature = self.MCD12Q1v6stable_LCType1(feature)
       if self.reference == "MCD12Q1v6stable_LCProp1": feature = self.MCD12Q1v6stable_LCProp1(feature)
-      if self.reference == "MCD12Q1v6stable01to18_LCProp2": feature = self.MCD12Q1v6stable01to18_LCProp2(feature)
+      if self.reference == "MCD12Q1v6stable01to15_LCProp2": feature = self.MCD12Q1v6stable01to15_LCProp2(feature)
       if self.reference == "MCD12Q1v6stable01to03_LCProp2": feature = self.MCD12Q1v6stable01to03_LCProp2(feature)
       if self.reference == "ESAraw": feature = self.ESAraw(feature)
       if self.reference == "ESAstable": feature = self.ESAstable(feature)

@@ -62,16 +62,16 @@ def parse_arguments(argv):
   parser.add_argument('--allow_growth', type=bool, default=True, help="Allow dynamic VRAM growth of TF")
   parser.add_argument('--limit_batches', type=int, default=-1,
                       help="artificially reduce number of batches to encourage overfitting (for debugging)")
-  parser.add_argument('-exp', '--experiment', type=str, default="bands", help='Experiment to train')
+  parser.add_argument('-experiment', '--experiment', type=str, default="bands", help='Experiment to train')
   parser.add_argument('-ref', '--reference', type=str, default="MCD12Q1v6raw_LCType1",
                       help='Reference dataset to train')
   parser.add_argument('--learning_rate', type=float, default=0.001,
                       help="overwrite learning rate. Required placeholder named 'learning_rate' in model")
   parser.add_argument('--convrnn_filters', type=int, default=8,
                       help="number of convolutional filters in ConvLSTM/ConvGRU layer")
-  parser.add_argument('--convrnn_layers', type=int, default=1,
-                      help="number of convolutional recurrent layers")
   parser.add_argument('-step', '--step', type=str, default="training", help='step')
+  parser.add_argument('-num_bands_250m', '--num_bands_250m', type=int, default=2, help='num_bands_250m')
+  parser.add_argument('-num_bands_500m', '--num_bands_500m', type=int, default=5, help='num_bands_500m')
 
   args, _ = parser.parse_known_args(args=argv[1:])
   return args
@@ -97,20 +97,49 @@ def train_and_evaluate(args):
     test_steps = num_samples_test / args.batchsize
     ckp_steps = num_samples_train / args.batchsize
 
+    if args.experiment == 'bands':
+        bands250m = 2
+        bands500m = 5
+    elif args.experiment == 'bandswodoy':
+        bands250m = 2
+        bands500m = 5
+    elif args.experiment == 'bands250m':
+        bands250m = 2
+        bands500m = 1
+    elif args.experiment == 'bandswoblue':
+        bands250m = 2
+        bands500m = 4
+    elif args.experiment == 'bandsaux':
+        bands250m = 5
+        bands500m = 5
+    elif args.experiment == 'evi2':
+        bands250m = 1
+        bands500m = 1
+    elif args.experiment == 'indices':
+        bands250m = 7
+        bands500m = 5
+    else:
+        bands250m = 10
+        bands500m = 5
+
+    args.num_bands_250m = bands250m
+    args.num_bands_500m = bands500m
+
     train_input_fn = functools.partial(
         inputs.input_fn_train_multiyear,
         args,
         mode=tf.estimator.ModeKeys.TRAIN
     )
 
-    hook = tf.train.ProfilerHook(save_steps=ckp_steps,
-                                 output_dir=os.path.join(args.modeldir,get_trial_id()),
-                                 show_memory=True)
+    # hook = tf.train.ProfilerHook(save_steps=ckp_steps,
+    #                              output_dir=os.path.join(args.modeldir,get_trial_id()),
+    #                              show_memory=True)
 
     train_spec = tf.estimator.TrainSpec(
         train_input_fn,
-        max_steps=train_steps,
-        hooks=[hook])
+        # hooks=[hook],
+        max_steps=train_steps
+        )
 
     eval_input_fn = functools.partial(
         inputs.input_fn_train_multiyear,

@@ -32,7 +32,7 @@ tf.app.flags.DEFINE_float("recurrent_dropout_i", 1.,
                           "input keep probability for recurrent dropout (default no dropout -> 1.)")
 tf.app.flags.DEFINE_float("recurrent_dropout_c", 1.,
                           "state keep probability for recurrent dropout (default no dropout -> 1.)")
-tf.app.flags.DEFINE_integer("convrnn_layers", None, "number of convolutional recurrent layers")
+tf.app.flags.DEFINE_integer("convrnn_layers", 1, "number of convolutional recurrent layers")
 tf.app.flags.DEFINE_boolean("peephole", False,
                             "use peephole connections at convrnn layer. only for lstm (default False)")
 tf.app.flags.DEFINE_boolean("convrnn_normalize", True, "normalize with batchnorm at convrnn layer (default True)")
@@ -48,8 +48,8 @@ tf.app.flags.DEFINE_float("epsilon", 0.9, "Adam epsilon")
 tf.app.flags.DEFINE_string("expected_datatypes",
                            "(tf.float32, tf.float32, tf.float32, tf.float32, tf.int64)", "expected datatypes")
 tf.app.flags.DEFINE_integer("pix250m", None, "number of 250m pixels")
-tf.app.flags.DEFINE_integer("num_bands_250m", 2, "number of bands in 250 meter resolution (4)")
-tf.app.flags.DEFINE_integer("num_bands_500m", 5, "number of bands in 500 meter resolution (6)")
+tf.app.flags.DEFINE_integer("num_bands_250m", None, "number of bands in 250 meter resolution (4)")
+tf.app.flags.DEFINE_integer("num_bands_500m", None, "number of bands in 500 meter resolution (6)")
 tf.app.flags.DEFINE_integer("num_classes", 11,
                             "number of classes not counting unknown class -> e.g. 0:uk,1:a,2:b,3:c,4:d -> num_classes 4")
 
@@ -69,6 +69,7 @@ tf.app.flags.DEFINE_string('dataset', '', 'dataset')
 tf.app.flags.DEFINE_string('writetiles', '', 'writetiles')
 tf.app.flags.DEFINE_string('writeconfidences', '', 'writeconfidences')
 tf.app.flags.DEFINE_string('step', '', 'step')
+tf.app.flags.DEFINE_string('experiment', None, 'experiment')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -172,6 +173,7 @@ def optimize(loss, global_step, name):
 
     # return train_op
 
+
 def eval_oa(logits, labels, mask):
 
     prediction_scores = tf.nn.softmax(logits=logits, name="prediction_scores")
@@ -254,6 +256,7 @@ def input(features, labels):
         t = tf.shape(x250)[1]
         px = tf.shape(x250)[2]
 
+
         x500 = tf.identity(resize(x500, px, px), name="x500")
 
         tf.compat.v1.add_to_collection(ADVANCED_SUMMARY_COLLECTION_NAME, tf.identity(x250, name="x250"))
@@ -266,8 +269,37 @@ def input(features, labels):
         x = tf.concat((x250, x500, doymat, yearmat), axis=-1, name="x")
         tf.compat.v1.add_to_collection(ADVANCED_SUMMARY_COLLECTION_NAME, x)
 
+        if FLAGS.experiment == 'bands':
+            bands250m = 2
+            bands500m = 5
+        elif FLAGS.experiment == 'bandswodoy':
+            bands250m = 2
+            bands500m = 5
+        elif FLAGS.experiment == 'bands250m':
+            bands250m = 2
+            bands500m = 1
+        elif FLAGS.experiment == 'bandswoblue':
+            bands250m = 2
+            bands500m = 4
+        elif FLAGS.experiment == 'bandsaux':
+            bands250m = 5
+            bands500m = 5
+        elif FLAGS.experiment == 'evi2':
+            bands250m = 1
+            bands500m = 1
+        elif FLAGS.experiment == 'indices':
+            bands250m = 7
+            bands500m = 5
+        else:
+            bands250m = 10
+            bands500m = 5
+
+        FLAGS.num_bands_250m = bands250m
+        FLAGS.num_bands_500m = bands500m
+
         # set depth of x for convolutions
         depth = FLAGS.num_bands_250m + FLAGS.num_bands_500m + 2  # doy and year
+        # depth = bands250m + bands500m + 2  # doy and year
 
         # dynamic shapes. Fill for debugging
         x.set_shape([None, None, FLAGS.pix250m, FLAGS.pix250m, depth])
@@ -325,8 +357,37 @@ def input_eval(features):
         x = tf.concat((x250, x500, doymat, yearmat), axis=-1, name="x")
         tf.compat.v1.add_to_collection(ADVANCED_SUMMARY_COLLECTION_NAME, x)
 
+        if FLAGS.experiment == 'bands':
+            bands250m = 2
+            bands500m = 5
+        elif FLAGS.experiment == 'bandswodoy':
+            bands250m = 2
+            bands500m = 5
+        elif FLAGS.experiment == 'bands250m':
+            bands250m = 2
+            bands500m = 1
+        elif FLAGS.experiment == 'bandswoblue':
+            bands250m = 2
+            bands500m = 4
+        elif FLAGS.experiment == 'bandsaux':
+            bands250m = 5
+            bands500m = 5
+        elif FLAGS.experiment == 'evi2':
+            bands250m = 1
+            bands500m = 1
+        elif FLAGS.experiment == 'indices':
+            bands250m = 7
+            bands500m = 5
+        else:
+            bands250m = 10
+            bands500m = 5
+
+        FLAGS.num_bands_250m = bands250m
+        FLAGS.num_bands_500m = bands500m
+
         # set depth of x for convolutions
         depth = FLAGS.num_bands_250m + FLAGS.num_bands_500m + 2  # doy and year
+        # depth = bands250m + bands500m + 2  # doy and year
 
         # dynamic shapes. Fill for debugging
         x.set_shape([None, None, FLAGS.pix250m, FLAGS.pix250m, depth])

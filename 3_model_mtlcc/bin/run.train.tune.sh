@@ -8,8 +8,10 @@ OUTPUT_BUCKET="gs://${BUCKET_NAME}"
 TRAINING_JOB_NAME="${PROJECT}_hpt_train_${NOW}"
 INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/${PZISE_train}/multiple"
 MODEL_PATH="${OUTPUT_BUCKET}/${TRAINING_JOB_NAME}"
-EPOCHS=5
-TRAIN_YEAR='2002'
+EPOCHS=1
+TRAIN_YEAR='2001'
+
+NUM_GPUS_IN_MASTER=1
 
 gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --module-name trainer.task \

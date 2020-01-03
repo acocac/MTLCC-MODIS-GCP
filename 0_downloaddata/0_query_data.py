@@ -78,7 +78,7 @@ def adddata250m(img):
     img = img.addBands(srtm.rename('elevation').int()).addBands(ee.Terrain.slope(srtm).rename('slope').int()).addBands(ee.Terrain.aspect(srtm).rename('aspect').int()).addBands(bio01.rename('bio01').int()).addBands(bio12.rename('bio12').int())\
         .addBands(rawmapv6_LCType1.rename('MCD12Q1v6raw_LCType1').int()).addBands(finalmapv6_LCType1.rename('MCD12Q1v6stable_LCType1').int())\
         .addBands(rawmapv6_LCProp1.rename('MCD12Q1v6raw_LCProp1').int()).addBands(finalmapv6_LCProp1.rename('MCD12Q1v6stable_LCProp1').int())\
-        .addBands(rawmapv6_LCProp2.rename('MCD12Q1v6raw_LCProp2').int()).addBands(finalmapv6_LCProp2_01to18.rename('MCD12Q1v6stable01to18_LCProp2').int()).addBands(finalmapv6_LCProp2_01to03.rename('MCD12Q1v6stable01to03_LCProp2').int()) \
+        .addBands(rawmapv6_LCProp2.rename('MCD12Q1v6raw_LCProp2').int()).addBands(finalmapv6_LCProp2_01to15.rename('MCD12Q1v6stable01to15_LCProp2').int()).addBands(finalmapv6_LCProp2_01to03.rename('MCD12Q1v6stable01to03_LCProp2').int()) \
         .addBands(rawmap_ESA.rename('ESAraw').int()).addBands(finalmap_ESA.rename('ESAstable').int())\
         .addBands(raw_copernicus.rename('Copernicusraw').int()) \
         .addBands(copernicus_fraction)
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     finalmapv6_LCProp1 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Prop1');
     rawmapv6_LCProp2 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Prop2');
     #finalmapv6_LCProp2 = filtermap(MCD12Q1v6, str(tyear - 1) + '-01-01', str(tyear + 1) + '-12-31', 'LC_Prop2');
-    finalmapv6_LCProp2_01to18 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2018) + '-12-31', 'LC_Prop2');
+    finalmapv6_LCProp2_01to15 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Prop2');
     finalmapv6_LCProp2_01to03 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2003) + '-12-31', 'LC_Prop2');
 
     # rawmapv6_LCType1 = downscale(rawmapv6_LCType1)

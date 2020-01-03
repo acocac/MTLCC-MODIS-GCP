@@ -620,7 +620,7 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
                 labels = labels_[t].astype(np.int64)
 
                 reference = ['MCD12Q1v6raw_LCType1', 'MCD12Q1v6stable_LCType1', 'MCD12Q1v6raw_LCProp1', 'MCD12Q1v6stable_LCProp1',
-                             'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to18_LCProp2', 'MCD12Q1v6stable01to03_LCProp2',
+                             'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to15_LCProp2', 'MCD12Q1v6stable01to03_LCProp2',
                              'ESAraw', 'ESAstable',
                              'Copernicusraw','Copernicusraw_fraction','Copernicusnew_cf2others',
                              'mergedatasets2own','mergedatasets2HuHu','mergedatasets2Tsendbazaretal_ori','mergedatasets2Tsendbazaretal_new']
@@ -662,7 +662,7 @@ if __name__ == '__main__':
             os.makedirs(class_path)
 
         reference = ['MCD12Q1v6raw_LCType1', 'MCD12Q1v6stable_LCType1', 'MCD12Q1v6raw_LCProp1', 'MCD12Q1v6stable_LCProp1',
-                     'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to18_LCProp2', 'MCD12Q1v6stable01to03_LCProp2',
+                     'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to15_LCProp2', 'MCD12Q1v6stable01to03_LCProp2',
                       'ESAraw', 'ESAstable',
                       'Copernicusraw', 'Copernicusfrac',
                       'Copernicusraw_fraction','Copernicusnew_cf2others',
@@ -696,8 +696,6 @@ if __name__ == '__main__':
         if exportblocks == 'train' or exportblocks == 'train_forest70':
             target_tiles = gpd.read_file(os.path.join(rootdir, 'geodata', 'blocks', str(psize), 'geojson', 'fileid.geojson'))
 
-            # target_tiles = set(
-            #     [os.path.basename(tiles[0]).split('-')[0] + '-' + str(i) + '.gz' for i in target_tiles.file_id])
             train_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','train_fold0.tileids')),
                 dtype='str').tolist()
@@ -729,8 +727,6 @@ if __name__ == '__main__':
         if exportblocks == 'train' or exportblocks == 'train_forest70':
             target_tiles = gpd.read_file(os.path.join(rootdir, 'geodata', 'blocks', str(psize), 'geojson', 'fileid.geojson'))
 
-            # target_tiles = set(
-            #     [os.path.basename(tiles[0]).split('-')[0] + '-' + str(i) + '.gz' for i in target_tiles.file_id])
             train_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','train_fold0.tileids')),
                 dtype='str').tolist()

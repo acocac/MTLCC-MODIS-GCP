@@ -256,7 +256,7 @@ if __name__ == '__main__':
     bands_250m_spectral = ['red', 'NIR']
     bands_500m_spectral = ['blue', 'green', 'SWIR1', 'SWIR2','SWIR3']
     bands_250m_aux = ['bio01', 'bio12', 'elevation','slope','aspect']
-    version_discrete = ['MCD12Q1v6raw_LCType1', 'MCD12Q1v6stable_LCType1', 'MCD12Q1v6raw_LCProp1', 'MCD12Q1v6stable_LCProp1', 'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to18_LCProp2', 'MCD12Q1v6stable01to03_LCProp2', 'ESAraw', 'ESAstable', 'Copernicusraw']
+    version_discrete = ['MCD12Q1v6raw_LCType1', 'MCD12Q1v6stable_LCType1', 'MCD12Q1v6raw_LCProp1', 'MCD12Q1v6stable_LCProp1', 'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to15_LCProp2', 'MCD12Q1v6stable01to03_LCProp2', 'ESAraw', 'ESAstable', 'Copernicusraw']
 
     if project.startswith("tile_"):
         v_start = ['mapbiomas']

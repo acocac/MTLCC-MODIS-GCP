@@ -12,7 +12,7 @@ credentials = service_account.Credentials.from_service_account_file(key_path, sc
 # Define the project id and the job id and format it for the api request
 profect_id_name = 'tutorials-201907'
 project_id = 'projects/{}'.format(profect_id_name)
-job_name = 'sample_hpt_train_20191004_143530'
+job_name = 'tile_0_563_hpt_train_20200102173533'
 job_id = '{}/jobs/{}'.format(project_id, job_name)
 
 # Build the service

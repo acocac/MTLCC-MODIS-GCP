@@ -36,10 +36,9 @@ CELL=(1)
 LAYERS=(1)
 LR=(0.001)
 BS=(8)
+experiment=(bands250m)
 
 NUM_GPUS_IN_MASTER=1
-NUM_GPUS_IN_WORKER=4
-NUM_WORKERS=2
 
 gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --module-name trainer.task \
@@ -60,8 +59,8 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --reference ${REFERENCE} \
   --pix250m ${PZISE_train} \
   --convrnn_filters ${CELL} \
-  --convrnn_layers ${LAYERS} \
   --learning_rate ${LR} \
+  --experiment ${experiment} \
 
 echo "Upon completion, serve the model by running: bin/run.serve.cloud.sh ${NOW}"
 
@@ -69,6 +68,8 @@ echo "Upon completion, serve the model by running: bin/run.serve.cloud.sh ${NOW}
 #  --master-machine-type n1-standard-16 \
 #  --master-accelerator count=$NUM_GPUS_IN_MASTER,type=nvidia-tesla-t4 \
 
+#NUM_GPUS_IN_WORKER=4
+#NUM_WORKERS=2
 #  --worker-count $NUM_WORKERS \
 #  --worker-machine-type n1-standard-16 \
 #  --worker-accelerator count=$NUM_GPUS_IN_WORKER,type=nvidia-tesla-k80 \
