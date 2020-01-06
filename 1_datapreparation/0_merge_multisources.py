@@ -239,6 +239,8 @@ if __name__ == '__main__':
 
     batchsize_merge = n_patches_first
 
+    print(batchsize_merge)
+
     tfiles_250m_spectral = (n_patches_first * (len(fileNames_250m_spectral)-1)) + n_patches_last
 
     n_patches_first = sum(1 for _ in tf.python_io.tf_record_iterator(fileNames_500m_spectral[0], options=options))

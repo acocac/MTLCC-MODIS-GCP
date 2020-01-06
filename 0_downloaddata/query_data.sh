@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-YEARS=(2001 2002 2003)
+YEARS=(2001 2003)
 PROJECTS=(AMZ)
 psize=(384)
 RESOLUTIONS=(250m_spectral 250m_aux 500m_spectral) #250m_spectral 250m_aux 500m_spectral

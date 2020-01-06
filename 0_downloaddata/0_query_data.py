@@ -216,12 +216,14 @@ if __name__ == '__main__':
     ##AOI
     if outdir == 'AMZ':
         aoi = ee.FeatureCollection('ft:1Tv0-78XXpd0qCWbrylwFWl4Pc3W1vdmnZqiEMmVs', 'geometry'); #RAISG
+        sizeGEE = 300000000
     elif outdir.startswith("tile_"):
         tiles = ee.FeatureCollection('users/acocacbasic/thesis/model/patchid_AMZ384_250mSpectral')
         _, patch_id, file_id = outdir.split("_")
         aoi = tiles.filter(ee.Filter.And(ee.Filter.eq("file_id", int(file_id)), ee.Filter.eq("patch_id", int(patch_id))))
     else:
         aoi = ee.FeatureCollection('users/acocacbasic/test_aois/tile_1_612')
+        sizeGEE = 1000000000
     # aoi = ee.FeatureCollection('users/acocac/tile4')
     # aoi = ee.FeatureCollection('users/acocac/thesis/fieldcampaigns/fc1_2004_01_01_2013_04_07')
 
@@ -465,7 +467,7 @@ if __name__ == '__main__':
                 'tensorDepths': depth,
                 'collapseBands': False,
                 'compressed': True,
-                'maxFileSize': 1000000000 # 400000000 1000000000 to control number of patches per tfrecord
+                'maxFileSize': sizeGEE # 400000000 1000000000 (max) to control number of patches per tfrecord
             }
         )
 
