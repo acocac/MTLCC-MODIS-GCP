@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 class MODparser():
-  """ defined the MODIS .tfrecord format """
+  """ defined the MODIS format """
 
   def __init__(self):
 
