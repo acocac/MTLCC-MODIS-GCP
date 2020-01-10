@@ -1,0 +1,39 @@
+trainingInput:
+  hyperparameters:
+    goal: MAXIMIZE
+    maxTrials: 1
+    maxParallelTrials: 1
+    hyperparameterMetricTag: accuracy
+    params:
+    - parameterName: n_estimators
+      type: INTEGER
+      minValue: 50
+      maxValue: 2000
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: max_features
+      type: CATEGORICAL
+      categoricalValues: [
+        "auto",
+        "sqrt"
+      ]
+    - parameterName: max_depth
+      type: INTEGER
+      minValue: 10
+      maxValue: 110
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: min_samples_split
+      type: INTEGER
+      minValue: 2
+      maxValue: 10
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: min_samples_leaf
+      type: INTEGER
+      minValue: 1
+      maxValue: 4
+      scaleType: UNIT_LINEAR_SCALE
+    - parameterName: bootstrap
+      type: CATEGORICAL
+      categoricalValues: [
+        "True",
+        "False"
+      ]
