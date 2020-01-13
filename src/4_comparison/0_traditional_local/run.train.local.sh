@@ -2,20 +2,26 @@
 
 project=(AMZ)
 TRAIN_YEAR='2001|2002|2003'
-experiment=(4_comparison)
+train_year='200120022003'
+experiment=(3_comparison)
 MODELS=(RF)
 ssize=(3000)
 cpus=(12)
+FOLDS=(1 2)
+trials=(100)
 
 for model in ${MODELS[@]}; do
+    for fold in ${FOLDS[@]}; do
         mkdir -p "E:/acocac/research/${project}/models/$experiment/_logs"
-        echo "Training the best model of $model"
-        logfname="E:/acocac/research/${project}/models/$experiment/_logs/${model}.log"
-        python train.py "E:/acocac/research/${project}/models/$experiment/${model}_ssize${ssize}_${TRAIN_YEAR}" \
+        echo "Training the best model of $model with fold $fold"
+        logfname="E:/acocac/research/${project}/models/$experiment/_logs/${model}_run_fold${fold}.log"
+        python train.py "E:/acocac/research/${project}/models/$experiment/${model}_ssize${ssize}_trials${trials}_trainon${train_year}" \
             --classifier=$model \
-            --datadir="F:/acoca/research/gee/dataset/${project}/comparison/input/all/interpolated" \
+            --datadir="F:/acoca/research/gee/dataset/${project}/comparison/input/all/raw" \
             --train_on "${TRAIN_YEAR}" \
             --ssize $ssize \
-            --trials "F:\acoca\research\gee\dataset\AMZ\comparison\output\sample\interpolated\hyperopt_trials_niters100_ssize3000.pkl" \
+            --fold $fold \
+            --trials $trials \
             --cpus $cpus > $logfname 2>&1
+    done
 done

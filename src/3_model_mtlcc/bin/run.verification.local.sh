@@ -22,8 +22,8 @@
 
 . ./bin/_common.sh
 
-YEARS=(2002)
-experiment=(2_gcloud)
+YEARS=(2001 2002 2003)
+input=(bands)
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
 PROJECTS=(AMZ)
 
@@ -58,7 +58,7 @@ for reference in ${REFERENCES[@]}; do
               --writetiles \
               --batchsize=1 \
               --dataset=$year \
-              --experiment='bands' \
+              --experiment=$input \
               --reference=$reference \
               --step='verification' \
               --allow_growth TRUE > $logfname 2>&1

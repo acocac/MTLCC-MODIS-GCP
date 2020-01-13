@@ -33,26 +33,31 @@ def parse_arguments(argv):
     Dictionary of parsed arguments.
   """
   parser = argparse.ArgumentParser(description='Evalutation of models')
-  parser.add_argument('modeldir', type=str, help="directory containing H5 file 'model.h5'")
+  parser.add_argument('modeldir', type=str,
+                      help="directory containing H5 file 'model.h5'")
   parser.add_argument('--datadir', type=str, default=None,
                       help='directory containing the data (defaults to environment variable $datadir)')
   parser.add_argument('-v', '--verbose', action="store_true", help='verbosity')
   parser.add_argument('-t', '--writetiles', action="store_true",
                       help='write out pngs for each tile with prediction, label etc.')
-  parser.add_argument('-c', '--writeconfidences', action="store_true", help='write out confidence maps for each class')
-  parser.add_argument('-gt', '--writegt', action="store_true",
-                      help='write out pngs for each tile label etc.')
   parser.add_argument('-b', '--batchsize', type=int, default=32,
                       help='batchsize')
   parser.add_argument('-d', '--dataset', type=str, default="2016",
                       help='Dataset partition to train on. Datasets are defined as sections in dataset.ini in datadir')
-  parser.add_argument('--prefetch', type=int, default=6, help="prefetch batches")
-  parser.add_argument('--allow_growth', type=bool, default=True, help="Allow VRAM growth")
-  parser.add_argument('--storedir', type=str, default="tmp", help="directory to store tiles")
+  parser.add_argument('--prefetch', type=int, default=6,
+                      help="prefetch batches")
+  parser.add_argument('--allow_growth', type=bool, default=True,
+                      help="Allow VRAM growth")
+  parser.add_argument('--storedir', type=str, default="tmp",
+                      help="directory to store tiles")
   parser.add_argument('-exp', '--experiment', type=str, default="None")
   parser.add_argument('-ref', '--reference', type=str, default="MCD12Q1v6raw_LCType1", help='Reference dataset to train')
-  parser.add_argument('-step', '--step', type=str, default="evaluation", help='step')
-  parser.add_argument('-classifier', '--classifier', type=str, default="RF", help='classifier')
+  parser.add_argument('-step', '--step', type=str, default="evaluation",
+                      help='step')
+  parser.add_argument('-classifier', '--classifier', type=str, default="RF",
+                      help='classifier')
+  parser.add_argument('--fold', type=str, default=None,
+                      help='fold')
 
   args, _ = parser.parse_known_args(args=argv[1:])
 
@@ -64,7 +69,7 @@ def eval(args):
 
     print(args.dataset)
 
-    joblib_file = os.path.join(args.modeldir,'model-{}.h5'.format(args.classifier))
+    joblib_file = os.path.join(args.modeldir,'model-{}_fold{}.h5'.format(args.classifier,args.fold))
 
     # Load from file
     model = joblib.load(joblib_file)
@@ -100,11 +105,20 @@ def eval(args):
 
                 x_tile = x_test[0, :, : ]
 
-                pred = model.predict(x_tile)
+                if args.dataset == '2001':
+                    X = [np.concatenate([x_tile[t][0:7], x_tile[t]]) for t in range(x_tile.shape[0])]
+                    X = np.array(X)
+                else:
+                    X = x_tile
+
+                doy = np.array(range(1, 365, 8))
+                X = [np.concatenate([X[t], doy]) for t in range(X.shape[0])]
+                X = np.array(X)
+
+                pred = model.predict(X)
 
                 nx = int(math.sqrt(pred.shape[0]))
                 pred = np.reshape(pred, (1, nx, nx))
-
 
                 stepfrom = i * args.batchsize
                 stepto = stepfrom + args.batchsize + 1

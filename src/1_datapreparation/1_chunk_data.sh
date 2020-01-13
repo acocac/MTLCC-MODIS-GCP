@@ -11,7 +11,7 @@ mkdir -p "F:/acoca/research/gee/dataset/$project/_logs"
 if [ "$partition" = 'train_forest70' ] || [ "$partition" = "train" ];  then
     nworkers=(12)
 elif [ "$partition" = 'eval' ] || [ "$partition" = "crossyear" ];  then
-    nworkers=(1)
+    nworkers=(12)
 fi
 
 for project in ${PROJECTS[@]}; do

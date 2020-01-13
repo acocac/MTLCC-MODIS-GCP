@@ -243,7 +243,6 @@ if __name__ == '__main__':
     outdir = args.outdir
     dataset = args.dataset
     level = args.level
-    folds = args.folds
 
     def makedir(outfolder):
         if not os.path.exists(outfolder):
@@ -265,110 +264,76 @@ if __name__ == '__main__':
     n_classes = dataset_config[dataset]['classes']
     shortdataset = dataset_config[dataset]['short']
 
-    oa = [ ]
-    prec = [ ]
-    rec = [ ]
-    fscore = [ ]
-    kappa = [ ]
+    data = np.load(os.path.join(indir, 'truepred_' + args.targetyear + '.npy'))
+
+    y_true2 = data[:,0]
+    y_pred2 = data[:,1]
+
+    y_true2 = np.asarray(y_true2, dtype='int32')
+    y_pred2 = np.asarray(y_pred2, dtype='int32')
 
     if level == 'global':
-        kappa_loc = []
-        kappa_hist = []
-        chance_agrm= []
-        quant_agrm = []
-        quant_dagrm= []
-        all_agrm = []
-        all_dagrm = []
+        a, k, p, r, f = mr_metrics(confusion_matrix(y_true2,y_pred2), level)
+        kn, k_loc, k_hist, c_agrm, q_agrm, q_dagrm, a_agrm, a_dagrm = helpCalcKappa(confusion_matrix(y_true2,y_pred2))
 
-    if level == 'perclass':
-        ac_mean = []
-        ac_stf = []
-        quant_dagrm= []
-        all_dagrm = []
-        ids_all = []
+        oa = round(a * 100, 2)
+        prec = round(p * 100, 2)
+        rec = round(r * 100, 2)
+        fscore = round(f * 100, 2)
+        kappa = kn
+        kappa_loc = k_loc
+        kappa_hist = k_hist
+        chance_agrm = c_agrm
+        quant_agrm = q_agrm
+        quant_dagrm = q_dagrm
+        all_agrm = a_agrm
+        all_dagrm = a_dagrm
 
-    for i in range(0, len(folds)):
-        quantevalpath = os.path.join(indir, 'fold{}'.format(folds[i]))
-        data = np.load(os.path.join(quantevalpath, 'truepred_{}.npy'.format(args.targetyear)))
+        results = {'oa': oa, 'prec': prec, 'rec': rec, 'fscore': fscore, 'kappa': kappa, 'kappa_loc': kappa_loc,
+                   'kappa_hist': kappa_hist, 'chance_agrm': chance_agrm, 'quant_agrm':quant_agrm, 'quant_dagrm':quant_dagrm,
+                   'all_agrm':all_agrm, 'all_dagrm':all_dagrm}
 
-        y_true = data[:,0]
-        y_pred = data[:,1]
+        results_df = pd.DataFrame(results, columns=['oa', 'prec', 'rec', 'fscore',
+                                                    'kappa','kappa_hist', 'chance_agrm', 'quant_agrm',
+                                                    'quant_dagrm','all_agrm', 'all_dagrm'], index=[0])
 
-        y_true = np.asarray(y_true, dtype='int32')
-        y_pred = np.asarray(y_pred, dtype='int32')
+        results_df = results_df.T
 
-        y_true2 = np.ma.MaskedArray(y_true, mask=y_true == 0).compressed()
-        y_pred2 = np.ma.MaskedArray(y_pred, mask=y_true == 0).compressed()
+        results_df['dataset'] = dataset
+        results_df['shortname'] = shortdataset
+        results_df['metric'] = results_df.index
 
-        if level == 'global':
-            a, k, p, r, f = mr_metrics(confusion_matrix(y_true2,y_pred2), level)
-            kn, k_loc, k_hist, c_agrm, q_agrm, q_dagrm, a_agrm, a_dagrm = helpCalcKappa(confusion_matrix(y_true2,y_pred2))
+        results_df.to_csv(os.path.join(outdir,shortdataset + '_'+ args.targetyear + '_' + args.level + '.csv'), index = False)
 
-            oa.append(round(a * 100, 2))
-            prec.append(round(p * 100, 2))
-            rec.append(round(r * 100, 2))
-            fscore.append(round(f * 100, 2))
-            kappa.append(kn)
-            kappa_loc.append(k_loc)
-            kappa_hist.append(k_hist)
-            chance_agrm.append(c_agrm)
-            quant_agrm.append(q_agrm)
-            quant_dagrm.append(q_dagrm)
-            all_agrm.append(a_agrm)
-            all_dagrm.append(a_dagrm)
+    elif level == 'perclass':
+        # metrics = mr_metrics(confusion_matrix(y_true2, y_pred2), level)
+        cm = confusion_matrix(y_true2, y_pred2)
+        ids = np.unique(y_true2)
 
-            results = {'oa': oa, 'prec': prec, 'rec': rec, 'fscore': fscore, 'kappa': kappa, 'kappa_loc': kappa_loc,
-                       'kappa_hist': kappa_hist, 'chance_agrm': chance_agrm, 'quant_agrm':quant_agrm, 'quant_dagrm':quant_dagrm,
-                       'all_agrm':all_agrm, 'all_dagrm':all_dagrm}
+        overall_accuracy, kappa, precision, recall, f1, cl_acc = mr_metrics(cm, 'perclass')
+        kn, k_loc, k_hist, c_agrm, q_agrm, q_dagrm, a_agrm, a_dagrm = helpCalcKappa(confusion_matrix(y_true2,y_pred2))
+        support = cm.sum(1)  # 0 -> prediction 1 -> ground truth
 
-            results_df = pd.DataFrame(results, columns=['oa', 'prec', 'rec', 'fscore',
-                                                         'kappa','kappa_hist', 'chance_agrm', 'quant_agrm',
-                                                         'quant_dagrm','all_agrm', 'all_dagrm'])
-            results_df = results_df.T
+        f = f1_score(y_true2, y_pred2, average=None)
+        r = recall_score(y_true2, y_pred2, average=None)
+        p = precision_score(y_true2, y_pred2, average=None)
 
-            results_df['dataset'] = dataset
-            results_df['shortname'] = shortdataset
-            results_df['metric'] = results_df.index
+        ac_mean = cl_acc
+        oa = overall_accuracy
+        quant_dagrm = q_dagrm
+        all_dagrm = a_dagrm
 
-            results_df.to_csv(os.path.join(outdir, shortdataset + '_' + args.targetyear + '_' + args.level + '.csv'),
-                              index=False)
+        prec = p
+        rec = r
+        fscore = f
 
-        elif level == 'perclass':
-            # metrics = mr_metrics(confusion_matrix(y_true2, y_pred2), level)
-            cm = confusion_matrix(y_true2, y_pred2)
-
-            ids_pred2 = np.unique(y_pred2)
-            ids_y_true2 = np.unique(y_true2)
-            ids_both = np.concatenate([ids_pred2,ids_y_true2])
-            ids = np.unique(ids_both)
-
-            ids_all.append(ids)
-
-            overall_accuracy, kappa, precision, recall, f1, cl_acc = mr_metrics(cm, 'perclass')
-            kn, k_loc, k_hist, c_agrm, q_agrm, q_dagrm, a_agrm, a_dagrm = helpCalcKappa(confusion_matrix(y_true2,y_pred2))
-            support = cm.sum(1)  # 0 -> prediction 1 -> ground truth
-
-            f = f1_score(y_true2, y_pred2, average=None)
-            r = recall_score(y_true2, y_pred2, average=None)
-            p = precision_score(y_true2, y_pred2, average=None)
-
-            ac_mean.append(cl_acc)
-            oa.append(overall_accuracy)
-            quant_dagrm.append(q_dagrm)
-            all_dagrm.append(a_dagrm)
-
-            prec.append(p)
-            rec.append(r)
-            fscore.append(f)
-
-    if level == 'perclass':
         labels = dataset_config[dataset]['labels']
         shortname = dataset_config[dataset]['shortname']
 
-        ids_all = np.unique(ids_all)
+        ids_all = ids
 
         newlabels= [labels[i] for i in ids_all]
         newshort= [shortname[i] for i in ids_all]
-
+        print(newlabels)
         outfile = os.path.join(outdir,shortdataset + '_'+ args.targetyear + '_' + args.level + '.csv')
         confusionmatrix2table_perclass(shortdataset, oa, fscore, quant_dagrm, all_dagrm, ids_all, newlabels, newshort, outfile)

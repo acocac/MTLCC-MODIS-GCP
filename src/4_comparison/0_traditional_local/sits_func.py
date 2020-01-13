@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from ast import literal_eval
 
-def readSITSData(name_file, year):
+def readSITSData(name_file, year, normalise=False):
 	"""
 		Read the data contained in name_file
 		INPUT:
@@ -55,6 +55,11 @@ def readSITSData(name_file, year):
 		X = np.asarray(x, dtype='float32')
 
 	doy = np.array(range(1,365,8))
+
+	if normalise:
+		X = normalize_fixed(X, -100, 16000)
+		doy = doy / 365
+
 	X = [np.concatenate([X[t],doy]) for t in range(X.shape[0])]
 	X = np.array(X)
 
@@ -63,3 +68,25 @@ def readSITSData(name_file, year):
 	polygon_ids = np.asarray(polygon_ids, dtype='uint16')
 
 	return X, polygon_ids, y
+
+def computingMinMax(X, per=2):
+	min_per = np.percentile(X, per, axis=(0,1))
+	max_per = np.percentile(X, 100-per, axis=(0,1))
+	return min_per, max_per
+
+def reshape_data(X, nchannels):
+	"""
+		Reshaping (feature format (3 bands): d1.b1 d1.b2 d1.b3 d2.b1 d2.b2 d2.b3 ...)
+		INPUT:
+			-X: original feature vector ()
+			-feature_strategy: used features (options: SB, NDVI, SB3feat)
+			-nchannels: number of channels
+		OUTPUT:
+			-new_X: data in the good format for Keras models
+	"""
+
+	return X.reshape(X.shape[0], int(X.shape[1]/nchannels), nchannels)
+
+def normalize_fixed(X, min_per, max_per):
+	x_normed = (X-min_per) / (max_per-min_per)
+	return x_normed

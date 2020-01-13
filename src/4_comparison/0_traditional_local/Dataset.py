@@ -137,15 +137,15 @@ class Dataset():
         x = tf.transpose(x, [1, 2, 0, 3])
 
         x = tf.reshape(x, (tf.shape(x)[1] * tf.shape(x)[1], tf.shape(x)[2] * tf.shape(x)[3]))  # -1 means "all"
-        # doy = tf.tile(doy, [tf.shape(x)[1] * tf.shape(x)[1], tf.shape(doy)[0]])
-        doy = doy[tf.newaxis, :]
-        doy = tf.tile(doy,[tf.shape(x)[0],1])
 
-        doy = tf.cast(doy, tf.float32)
+        # doy = doy[tf.newaxis, :]
+        # doy = tf.tile(doy,[tf.shape(x)[0],1])
+        #
+        # doy = tf.cast(doy, tf.float32)
+        #
+        # x_final = tf.concat([x,doy], axis=1)
 
-        x_final = tf.concat([x,doy], axis=1)
-
-        return x_final
+        return x
 
   def MCD12Q1v6stable01to15_LCProp2(self, feature):
 
