@@ -297,8 +297,11 @@ if __name__ == '__main__':
         y_true = np.asarray(y_true, dtype='int32')
         y_pred = np.asarray(y_pred, dtype='int32')
 
-        y_true2 = np.ma.MaskedArray(y_true, mask=y_true == 0).compressed()
-        y_pred2 = np.ma.MaskedArray(y_pred, mask=y_true == 0).compressed()
+        y_true = np.ma.MaskedArray(y_true, mask=y_true == 9).compressed()
+        y_pred = np.ma.MaskedArray(y_pred, mask=y_true == 9).compressed()
+
+        y_true2 = np.ma.MaskedArray(y_true, mask=y_pred == 9).compressed()
+        y_pred2 = np.ma.MaskedArray(y_pred, mask=y_pred == 9).compressed()
 
         if level == 'global':
             a, k, p, r, f = mr_metrics(confusion_matrix(y_true2,y_pred2), level)
@@ -337,10 +340,7 @@ if __name__ == '__main__':
             # metrics = mr_metrics(confusion_matrix(y_true2, y_pred2), level)
             cm = confusion_matrix(y_true2, y_pred2)
 
-            ids_pred2 = np.unique(y_pred2)
-            ids_y_true2 = np.unique(y_true2)
-            ids_both = np.concatenate([ids_pred2,ids_y_true2])
-            ids = np.unique(ids_both)
+            ids = np.unique(y_true2)
 
             ids_all.append(ids)
 
@@ -366,6 +366,10 @@ if __name__ == '__main__':
         shortname = dataset_config[dataset]['shortname']
 
         ids_all = np.unique(ids_all)
+
+        # ids_all = np.unique(np.concatenate(ids_all).ravel())
+
+        print(ids_all)
 
         newlabels= [labels[i] for i in ids_all]
         newshort= [shortname[i] for i in ids_all]

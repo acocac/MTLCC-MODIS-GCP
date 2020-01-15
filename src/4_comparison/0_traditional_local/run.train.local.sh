@@ -4,11 +4,11 @@ project=(AMZ)
 TRAIN_YEAR='2001|2002|2003'
 train_year='200120022003'
 experiment=(3_comparison)
-MODELS=(RF)
+MODELS=(SVM)
 ssize=(3000)
 cpus=(12)
-FOLDS=(1 2)
-trials=(100)
+FOLDS=(1 2 3 4)
+trials=(30)
 
 for model in ${MODELS[@]}; do
     for fold in ${FOLDS[@]}; do

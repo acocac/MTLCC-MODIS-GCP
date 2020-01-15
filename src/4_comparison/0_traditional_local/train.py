@@ -12,6 +12,8 @@ from sits_func import *
 from sklearn.externals import joblib
 
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+
 from imblearn.pipeline import make_pipeline as make_pipeline_imb
 from imblearn import over_sampling, under_sampling
 from hyperopt import Trials
@@ -73,11 +75,13 @@ def prep_data(partition,args):
 		if args.classifier == 'SVM':
 			x, ids, y = readSITSData(
 				os.path.join(args.datadir, 'fold{}'.format(args.fold),
-							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)), y, normalise=True)
+							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)),
+				y, normalise=True)
 		else:
 			x, ids, y = readSITSData(
 				os.path.join(args.datadir, 'fold{}'.format(args.fold),
-							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)), y)
+							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)),
+				y)
 
 		X.append(x)
 		Y.append(y)
@@ -96,9 +100,9 @@ def prep_data(partition,args):
 
 
 def run_model(args):
-	classif_type = ["RF"]
+	classif_type = ['RF','SVM']
 	if args.classifier not in classif_type:
-		print("ERR: select an available classifier (RF)")
+		print('ERR: select an available classifier (RF, SVM)')
 		sys.exit(1)
 
 	X_train, y_train, ids_train = prep_data('train', args)
@@ -112,27 +116,44 @@ def run_model(args):
 
 	bestmodel = getBestModelfromTrials(trials.trials, STATUS_OK)
 
-	if bestmodel['max_features'][0] == 0:
-		max_features = 'auto'
-	else:
-		max_features = 'sqrt'
-
-	if bestmodel['bootstrap'][0] == 0:
-		bootstrap = 'True'
-	else:
-		bootstrap = 'False'
-
 	resampling = over_sampling.RandomOverSampler(sampling_strategy='auto',
-										  random_state=42)
+												 random_state=42)
+	if args.classifier == 'RF':
+		if bestmodel['max_features'][0] == 0:
+			max_features = 'auto'
+		else:
+			max_features = 'sqrt'
 
-	estimator = RandomForestClassifier(n_estimators=int(bestmodel['n_estimators'][0]),
-									   max_features=max_features,
-									   max_depth=int(bestmodel['max_depth'][0]),
-									   min_samples_leaf=int(bestmodel['min_samples_leaf'][0]),
-									   min_samples_split=int(bestmodel['min_samples_split'][0]),
-									   bootstrap=bootstrap,
-									   n_jobs=-1,
-									   verbose=1)
+		if bestmodel['bootstrap'][0] == 0:
+			bootstrap = 'True'
+		else:
+			bootstrap = 'False'
+
+		estimator = RandomForestClassifier(n_estimators=int(bestmodel['n_estimators'][0]),
+										   max_features=max_features,
+										   max_depth=int(bestmodel['max_depth'][0]),
+										   min_samples_leaf=int(bestmodel['min_samples_leaf'][0]),
+										   min_samples_split=int(bestmodel['min_samples_split'][0]),
+										   bootstrap=bootstrap,
+										   n_jobs=-1,
+										   verbose=1)
+	else:
+		c_lim = (-2, 7)
+		g_lim = (-2, 4)
+
+		C_space = [10 ** exp for exp in range(*c_lim)]
+		gamma_space =  [10**exp for exp in range(*g_lim)]
+		kernel_space = ['rbf']
+
+		C = C_space[int(bestmodel['C'][0])]
+		gamma = gamma_space[int(bestmodel['gamma'][0])]
+		kernel = kernel_space[int(bestmodel['kernel'][0])]
+
+		print('Best model using C = {} gamma = {} and kernel {}'.format(C, gamma, kernel))
+		estimator = SVC(C=C,
+						gamma=gamma,
+						kernel=kernel,
+						verbose=1)
 
 	pl = make_pipeline_imb(resampling, estimator)
 

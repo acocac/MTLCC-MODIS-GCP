@@ -31,10 +31,11 @@ TRAIN_YEAR='2001'
 #TRAIN_YEAR=(2015)
 REFERENCE="MCD12Q1v6stable01to03_LCProp2"
 
-CELL=(128)
+CELL=(1)
 LAYERS=(1)
-LR=(0.01)
-BS=(32)
+LR=(1)
+BS=(8)
+experiment=(bands)
 
 mkdir -p "${MODEL_DIR}/_logs"
 logfname="${MODEL_DIR}/_logs/log.log"
@@ -53,6 +54,8 @@ gcloud ai-platform local train \
   --convrnn_layers ${LAYERS} \
   --learning_rate "${LR}" \
   --step 'training' \
+  --reference $REFERENCE \
+  --experiment ${experiment} \
   --batchsize ${BS} > $logfname 2>&1
 
 echo "Upon completion, serve the model by running: bin/run.serve.local.sh"

@@ -7,9 +7,9 @@ REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
 ssize=3000
 trials=100
 TRAIN_YEAR='200120022003'
-YEARS=(2001)
-level=(perclass)
-folds=(01)
+YEARS=(2001 2002 2003)
+level=(global)
+folds=(01234)
 
 for reference in ${REFERENCES[@]}; do
 
@@ -19,7 +19,7 @@ for reference in ${REFERENCES[@]}; do
 
         for year in ${YEARS[@]}; do
 
-            echo "Evaluating over year: $year and model: $model"
+            echo "Evaluating over year: $year and model: $model and level $level"
             logfname="E:/acocac/research/${project}/eval/metrics/$experiment/_logs/${model}_ssize${ssize}_trials${trials}_trainon${TRAIN_YEAR}_${reference}/${year}_out_${level}.log"\
 
             python 1_metrics.py \

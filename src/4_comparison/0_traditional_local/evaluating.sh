@@ -1,6 +1,6 @@
 #!/bin/bash
 
-project=(AMZ)
+project=(SVM)
 step=(verification)
 experiment=(3_comparison)
 data=(bands)
@@ -11,7 +11,7 @@ trials=100
 TRAIN_YEAR='200120022003'
 YEARS=(2001 2002 2003)
 psize_eval=(384)
-folds=(01234)
+FOLDS=(0 1 2 3 4)
 
 for reference in ${REFERENCES[@]}; do
 
@@ -27,7 +27,7 @@ for reference in ${REFERENCES[@]}; do
                      num_classes=(11)
                 fi
 
-                echo "Evaluating over year: $year and model: $model"
+                echo "Evaluating over year: $year and model: $model and fold: $fold"
                 logfname="E:/acocac/research/${project}/eval/pred/$experiment/_logs/${model}_ssize${ssize}_trials${trials}_trainon${TRAIN_YEAR}_${reference}/fold${fold}_${year}.log"
                 python evaluation.py "E:/acocac/research/${project}/models/$experiment/${model}_ssize${ssize}_trials${trials}_trainon${TRAIN_YEAR}/models" \
                     --datadir="F:/acoca/research/gee/dataset/${project}/gz/${psize_eval}/multiple" \

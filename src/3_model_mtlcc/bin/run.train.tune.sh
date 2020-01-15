@@ -10,6 +10,7 @@ INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/gz/${PZISE_train}"
 MODEL_PATH="${OUTPUT_BUCKET}/${TRAINING_JOB_NAME}"
 EPOCHS=10
 TRAIN_YEAR='2001 2002 2003'
+REFERENCE="MCD12Q1v6stable01to03_LCProp2"
 
 NUM_GPUS_IN_MASTER=1
 
@@ -30,6 +31,7 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --epochs "${EPOCHS}" \
   --pix250m ${PZISE_train} \
   --epochs "${EPOCHS}" \
+  --reference ${REFERENCE}
 
 #  --limit_batches 2 \
 

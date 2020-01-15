@@ -26,18 +26,21 @@
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
 YEARS=(2001)
 BS=1
-CELL=(128)
+CELL=(48)
 LAYERS=(1)
-LR=(0.01)
+LR=(0.0134547146203)
+TRIALID=(AMZ_hpt_train_20200105104429)
+BESTTRIAL=(20)
+experiment=(bands)
 
 for reference in ${REFERENCES[@]}; do
 
     INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_eval}/multiple"
-    MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/t2001-2003_1to3"
-    STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/t2001-2003_1to3"
+    MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/$TRIALID/$BESTTRIAL"
+    STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/$TRIALID/$BESTTRIAL"
 
     for year in ${YEARS[@]}; do
-        echo "Processing project: $PROJECT and year: $year and reference: $reference"
+        echo "Processing project: $PROJECT and year: $year and reference: $reference and trial $TRIALID folder $BESTTRIAL"
 
         mkdir -p "E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference"
         logfname="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference/$year.log"
@@ -55,6 +58,7 @@ for reference in ${REFERENCES[@]}; do
           --convrnn_filters ${CELL} \
           --convrnn_layers ${LAYERS} \
           --learning_rate ${LR} \
+          --experiment ${experiment} \
           --writetiles \
           --step 'evaluation' \
           --batchsize ${BS} > $logfname 2>&1

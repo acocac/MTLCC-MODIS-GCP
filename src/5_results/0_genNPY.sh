@@ -8,7 +8,7 @@ ssize=3000
 trials=100
 TRAIN_YEAR='200120022003'
 YEARS=(2001 2002 2003)
-FOLDS=(0 1)
+FOLDS=(0 1 2 3 4 5)
 
 for reference in ${REFERENCES[@]}; do
 

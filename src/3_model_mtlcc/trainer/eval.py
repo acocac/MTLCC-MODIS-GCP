@@ -225,7 +225,6 @@ def main():
 
   tf.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
-  print('ok')
   train_and_evaluate(args)
 
 

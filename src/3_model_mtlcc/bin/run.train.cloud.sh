@@ -36,7 +36,7 @@ CELL=(1)
 LAYERS=(1)
 LR=(0.001)
 BS=(8)
-experiment=(bands250m)
+experiment=(bands)
 
 NUM_GPUS_IN_MASTER=1
 
