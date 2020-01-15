@@ -26,16 +26,19 @@
 INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_train}/multiple"
 MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud"
 
-EPOCHS=1
-TRAIN_YEAR='2001'
+EPOCHS=20
+TRAIN_YEAR='2001 2002 2003'
 #TRAIN_YEAR=(2015)
 REFERENCE="MCD12Q1v6stable01to03_LCProp2_major"
 
-CELL=(1)
 LAYERS=(1)
-LR=(1)
-BS=(8)
+
+BS=(24)
+CELL=(48)
+LR=(0.0022)
+optimizertype=(adam)
 experiment=(bands)
+epsilon=1e-4
 
 mkdir -p "${MODEL_DIR}/_logs"
 logfname="${MODEL_DIR}/_logs/log.log"
@@ -56,6 +59,8 @@ gcloud ai-platform local train \
   --step 'training' \
   --reference $REFERENCE \
   --experiment ${experiment} \
+  --optimizertype ${optimizertype} \
+  --epsilon ${epsilon} \
   --batchsize ${BS} > $logfname 2>&1
 
 echo "Upon completion, serve the model by running: bin/run.serve.local.sh"

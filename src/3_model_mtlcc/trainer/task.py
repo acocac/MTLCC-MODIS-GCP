@@ -72,6 +72,9 @@ def parse_arguments(argv):
   parser.add_argument('-step', '--step', type=str, default="training", help='step')
   parser.add_argument('-num_bands_250m', '--num_bands_250m', type=int, default=2, help='num_bands_250m')
   parser.add_argument('-num_bands_500m', '--num_bands_500m', type=int, default=5, help='num_bands_500m')
+  parser.add_argument('-optimizertype', '--optimizertype', type=str, default="optimizertype", help='optimizertype')
+  parser.add_argument('--epsilon', type=float, default=1e-08,
+                      help="epsilon of the Adam")
 
   args, _ = parser.parse_known_args(args=argv[1:])
   return args

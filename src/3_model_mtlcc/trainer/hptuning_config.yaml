@@ -2,27 +2,31 @@ trainingInput:
   hyperparameters:
     maxTrials: 3
     maxParallelTrials: 1
-    resumePreviousJobId: AMZ_hpt_train_20200107174826
+#    resumePreviousJobId: AMZ_hpt_train_20200107174826
     enableTrialEarlyStopping: True
-#    goal: MAXIMIZE
-#    hyperparameterMetricTag: accuracy
-#    params:
-#    - parameterName: batchsize
-##      type: DISCRETE
-##      discreteValues: [8, 16, 24, 32, 64]
-#      type: INTEGER
-#      minValue: 8
-#      maxValue: 64
-#      scaleType: UNIT_LOG_SCALE
-#    - parameterName: learning_rate
-#      type: DOUBLE
-#      minValue: 0.0001
-#      maxValue: 0.1
-#      scaleType: UNIT_LOG_SCALE
-#    - parameterName: convrnn_filters
-#      type: DISCRETE
-#      discreteValues: [8, 16, 24, 48, 64, 128, 256]
-#    - parameterName: experiment
-#      type: CATEGORICAL
-#      categoricalValues: [bands]
-##      categoricalValues: [bands, bandswoblue, bands250m, bandsaux, evi2, indices, all]
+    goal: MAXIMIZE
+    hyperparameterMetricTag: accuracy
+    params:
+    - parameterName: batchsize
+      type: DISCRETE
+      discreteValues: [8, 16, 24, 32, 40, 48, 56, 64]
+    - parameterName: learning_rate
+      type: DOUBLE
+      minValue: 0.0001
+      maxValue: 0.1
+      scaleType: UNIT_LOG_SCALE
+    - parameterName: epsilon
+      type: DOUBLE
+      minValue: 1e-8
+      maxValue: 1e-4
+      scaleType: UNIT_LOG_SCALE
+    - parameterName: convrnn_filters
+      type: DISCRETE
+      discreteValues: [8, 16, 24, 48, 64, 128, 256]
+    - parameterName: optimizertype
+      type: CATEGORICAL
+      categoricalValues: [adam, nadam]
+    - parameterName: experiment
+      type: CATEGORICAL
+      categoricalValues: [bands]
+#      categoricalValues: [bands, bandswoblue, bands250m, bandsaux, evi2, indices, all]

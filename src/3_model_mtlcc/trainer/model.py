@@ -19,8 +19,8 @@ from tensorflow.contrib.framework import arg_scope
 ## hyper parameters ##
 tf.app.flags.DEFINE_string("kernel", "(1,3,3)", "kernel of convolutions")
 tf.app.flags.DEFINE_string("classkernel", "(3,3)", "kernelsize of final classification convolution")
-tf.app.flags.DEFINE_string("cnn_activation", "leaky_relu",
-                           "activation function for convolutional layers ('relu' or 'leaky_relu' [default])")
+tf.app.flags.DEFINE_string("cnn_activation", 'leaky_relu',
+                           "activation function for convolutional layers ('relu' or 'leaky_relu')")
 
 tf.app.flags.DEFINE_boolean("bidirectional", True, "Bidirectional Convolutional RNN")
 tf.app.flags.DEFINE_integer("convrnn_compression_filters", -1,
@@ -42,7 +42,7 @@ tf.app.flags.DEFINE_string("aggr_strat", "state",
 tf.app.flags.DEFINE_float("learning_rate", None, "Adam learning rate")
 tf.app.flags.DEFINE_float("beta1", 0.9, "Adam beta1")
 tf.app.flags.DEFINE_float("beta2", 0.999, "Adam beta2")
-tf.app.flags.DEFINE_float("epsilon", 0.9, "Adam epsilon")
+tf.app.flags.DEFINE_float("epsilon", 1e-08, "Adam epsilon")
 
 ## expected data format ##
 tf.app.flags.DEFINE_string("expected_datatypes",
@@ -70,6 +70,7 @@ tf.app.flags.DEFINE_string('writetiles', '', 'writetiles')
 tf.app.flags.DEFINE_string('writeconfidences', '', 'writeconfidences')
 tf.app.flags.DEFINE_string('step', '', 'step')
 tf.app.flags.DEFINE_string('experiment', None, 'experiment')
+tf.app.flags.DEFINE_string('optimizertype', None, 'experiment')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -151,15 +152,21 @@ def loss(logits, labels, mask, name):
     return tf.reduce_mean(lpp, name=name)
 
 
-def optimize(loss, global_step, name):
+def optimize(loss, global_step, otype, name):
     lr = tf.compat.v1.placeholder_with_default(FLAGS.learning_rate, shape=(), name="learning_rate")
     beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
     beta2 = tf.compat.v1.placeholder_with_default(FLAGS.beta2, shape=(), name="beta2")
 
-    optimizer = tf.compat.v1.train.AdamOptimizer(
-        learning_rate=lr, beta1=beta1, beta2=beta2,
-        epsilon=FLAGS.epsilon
-    )
+    if otype == 'adam':
+        optimizer = tf.compat.v1.train.AdamOptimizer(
+            learning_rate=lr, beta1=beta1, beta2=beta2,
+            epsilon=FLAGS.epsilon
+        )
+    elif otype == 'nadam':
+        optimizer = tf.contrib.opt.NadamOptimizer(
+            learning_rate=lr, beta1=beta1, beta2=beta2,
+            epsilon=FLAGS.epsilon
+        )
 
     # method 1
     update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
@@ -467,7 +474,7 @@ def _model_fn(features, labels, mode, params):
 
       elif mode == tf.estimator.ModeKeys.TRAIN:
           print("building optimizer...")
-          train_op = optimize(loss_op, global_step, name="train_op")
+          train_op = optimize(loss_op, global_step, FLAGS.optimizertype, name="train_op")
           logging_hook = tf.estimator.LoggingTensorHook({"accuracy": ao_ops[0], 'loss': loss_op,  'global_step': global_step}, every_n_iter=64)
 
           # write FLAGS to file

@@ -674,7 +674,8 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
                              'MCD12Q1v6raw_LCProp2', 'MCD12Q1v6stable01to15_LCProp2', 'MCD12Q1v6stable01to03_LCProp2',
                              'ESAraw', 'ESAstable',
                              'Copernicusraw','Copernicusraw_fraction','Copernicusnew_cf2others',
-                             'mergedatasets2own','mergedatasets2HuHu','mergedatasets2Tsendbazaretal_ori','mergedatasets2Tsendbazaretal_new']
+                             'mergedatasets2own','mergedatasets2HuHu','mergedatasets2Tsendbazaretal_ori','mergedatasets2Tsendbazaretal_new',
+                             'MCD12Q1v6raw_LCProp2_major', 'MCD12Q1v6stable01to15_LCProp2_major','MCD12Q1v6stable01to03_LCProp2_major']
 
                 for r in range(len(reference)):
                     labels_class = np.max(labels[:,:,:,r], axis=0).flatten()
@@ -717,7 +718,8 @@ if __name__ == '__main__':
                       'ESAraw', 'ESAstable',
                       'Copernicusraw', 'Copernicusfrac',
                       'Copernicusraw_fraction','Copernicusnew_cf2others',
-                      'mergedatasets2own','mergedatasets2HuHu','mergedatasets2Tsendbazaretal_ori','mergedatasets2Tsendbazaretal_new']
+                      'mergedatasets2own','mergedatasets2HuHu','mergedatasets2Tsendbazaretal_ori','mergedatasets2Tsendbazaretal_new',
+                     'MCD12Q1v6raw_LCProp2_major', 'MCD12Q1v6stable01to15_LCProp2_major', 'MCD12Q1v6stable01to03_LCProp2_major']
 
         for r in reference:
             if not os.path.exists(os.path.join(class_path,r)):
