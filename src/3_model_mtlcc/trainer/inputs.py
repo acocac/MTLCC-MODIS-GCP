@@ -153,8 +153,8 @@ def input_filenames(args, mode):
 class Dataset():
   """ A wrapper class around Tensorflow Dataset api handling data normalization and augmentation """
 
-  def __init__(self, datadir, verbose=False, temporal_samples=None, section="dataset", augment=False, experiment="all",
-               reference="MCD12Q1v6_cleaned", step="training"):
+  def __init__(self, datadir, verbose=False, temporal_samples=None, section="dataset", augment=False, experiment="bands",
+               reference="MCD12Q1v6stable01to03_LCProp2_major", step="training"):
     self.verbose = verbose
 
     self.augment = augment
@@ -868,29 +868,29 @@ class Dataset():
 
     return x250, x500, doy, year, labels
 
-  def MCD12Q1v6raw_LCProp2(self, feature):
-
-    x250, x500, doy, year, labels = feature
-
-    labels = labels[ :, :, :, 4 ]
-
-    return x250, x500, doy, year, labels
-
-  def MCD12Q1v6stable01to15_LCProp2(self, feature):
-
-    x250, x500, doy, year, labels = feature
-
-    labels = labels[ :, :, :, 5 ]
-
-    return x250, x500, doy, year, labels
-
-  def MCD12Q1v6stable01to03_LCProp2(self, feature):
-
-    x250, x500, doy, year, labels = feature
-
-    labels = labels[ :, :, :, 6]
-
-    return x250, x500, doy, year, labels
+  # def MCD12Q1v6raw_LCProp2(self, feature):
+  #
+  #   x250, x500, doy, year, labels = feature
+  #
+  #   labels = labels[ :, :, :, 4 ]
+  #
+  #   return x250, x500, doy, year, labels
+  #
+  # def MCD12Q1v6stable01to15_LCProp2(self, feature):
+  #
+  #   x250, x500, doy, year, labels = feature
+  #
+  #   labels = labels[ :, :, :, 5 ]
+  #
+  #   return x250, x500, doy, year, labels
+  #
+  # def MCD12Q1v6stable01to03_LCProp2(self, feature):
+  #
+  #   x250, x500, doy, year, labels = feature
+  #
+  #   labels = labels[ :, :, :, 6]
+  #
+  #   return x250, x500, doy, year, labels
 
   def ESAraw(self, feature):
 
@@ -969,6 +969,38 @@ class Dataset():
     x250, x500, doy, year, labels = feature
 
     labels = labels[ :, :, :, 15 ]
+
+    return x250, x500, doy, year, labels
+
+  def merge_datasets2Tsendbazaretal3maps(self, feature):
+
+    x250, x500, doy, year, labels = feature
+
+    labels = labels[ :, :, :, 15 ]
+
+    return x250, x500, doy, year, labels
+
+  def MCD12Q1v6raw_LCProp2_major(self, feature):
+
+    x250, x500, doy, year, labels = feature
+
+    labels = labels[ :, :, :, 16]
+
+    return x250, x500, doy, year, labels
+
+  def MCD12Q1v6stable01to15_LCProp2_major(self, feature):
+
+    x250, x500, doy, year, labels = feature
+
+    labels = labels[ :, :, :, 17]
+
+    return x250, x500, doy, year, labels
+
+  def MCD12Q1v6stable01to03_LCProp2_major(self, feature):
+
+    x250, x500, doy, year, labels = feature
+
+    labels = labels[ :, :, :, 18]
 
     return x250, x500, doy, year, labels
 
@@ -1077,10 +1109,13 @@ class Dataset():
       if self.reference == "MCD12Q1v6raw_LCType1": feature = self.MCD12Q1v6raw_LCType1(feature)
       if self.reference == "MCD12Q1v6raw_LCProp1": feature = self.MCD12Q1v6raw_LCProp1(feature)
       if self.reference == "MCD12Q1v6raw_LCProp2": feature = self.MCD12Q1v6raw_LCProp2(feature)
+      if self.reference == "MCD12Q1v6raw_LCProp2_major": feature = self.MCD12Q1v6raw_LCProp2_major(feature)
       if self.reference == "MCD12Q1v6stable_LCType1": feature = self.MCD12Q1v6stable_LCType1(feature)
       if self.reference == "MCD12Q1v6stable_LCProp1": feature = self.MCD12Q1v6stable_LCProp1(feature)
       if self.reference == "MCD12Q1v6stable01to15_LCProp2": feature = self.MCD12Q1v6stable01to15_LCProp2(feature)
       if self.reference == "MCD12Q1v6stable01to03_LCProp2": feature = self.MCD12Q1v6stable01to03_LCProp2(feature)
+      if self.reference == "MCD12Q1v6stable01to15_LCProp2_major": feature = self.MCD12Q1v6stable01to15_LCProp2_major(feature)
+      if self.reference == "MCD12Q1v6stable01to03_LCProp2_major": feature = self.MCD12Q1v6stable01to03_LCProp2_major(feature)
       if self.reference == "ESAraw": feature = self.ESAraw(feature)
       if self.reference == "ESAstable": feature = self.ESAstable(feature)
       if self.reference == "Copernicusraw": feature = self.Copernicusraw(feature)

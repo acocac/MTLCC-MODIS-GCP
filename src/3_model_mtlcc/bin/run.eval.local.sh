@@ -23,7 +23,7 @@
 
 . ./bin/_common.sh
 
-REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
+REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
 YEARS=(2001)
 BS=1
 CELL=(48)

@@ -29,7 +29,7 @@ MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud"
 EPOCHS=1
 TRAIN_YEAR='2001'
 #TRAIN_YEAR=(2015)
-REFERENCE="MCD12Q1v6stable01to03_LCProp2"
+REFERENCE="MCD12Q1v6stable01to03_LCProp2_major"
 
 CELL=(1)
 LAYERS=(1)

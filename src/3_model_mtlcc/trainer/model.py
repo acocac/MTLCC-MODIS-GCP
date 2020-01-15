@@ -50,7 +50,7 @@ tf.app.flags.DEFINE_string("expected_datatypes",
 tf.app.flags.DEFINE_integer("pix250m", None, "number of 250m pixels")
 tf.app.flags.DEFINE_integer("num_bands_250m", None, "number of bands in 250 meter resolution (4)")
 tf.app.flags.DEFINE_integer("num_bands_500m", None, "number of bands in 500 meter resolution (6)")
-tf.app.flags.DEFINE_integer("num_classes", 11,
+tf.app.flags.DEFINE_integer("num_classes", 8,
                             "number of classes not counting unknown class -> e.g. 0:uk,1:a,2:b,3:c,4:d -> num_classes 4")
 
 ## performance ##

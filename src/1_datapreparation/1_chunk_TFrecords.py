@@ -60,6 +60,39 @@ def confirm(prompt=None, resp=False):
         if ans == 'n' or ans == 'N':
             return False
 
+class major_MCD12Q1v6_LCProp2():
+    def __init__(self, arr):
+        self.arr = arr
+
+    def MODIS(self):
+        """
+        a function for aggregating from ESA-CCI classes to simple classes
+        """
+        ##ESA-CCI to new classes
+        nodata = [0, 2]
+        B = [1]
+        W = [3]
+        Bu = [4]
+        DF = [5]
+        OF = [6, 7]
+        NH = [8, 9]
+        C = [10]
+        S = [11]
+
+        arr = self
+        arr_reclass = arr.copy()
+        arr_reclass[ np.isin(arr, nodata) ] = 0
+        arr_reclass[ np.isin(arr, B) ] = 1
+        arr_reclass[ np.isin(arr, W) ] = 2
+        arr_reclass[ np.isin(arr, Bu) ] = 3
+        arr_reclass[ np.isin(arr, DF) ] = 4
+        arr_reclass[ np.isin(arr, OF) ] = 5
+        arr_reclass[ np.isin(arr, NH) ] = 6
+        arr_reclass[ np.isin(arr, C) ] = 7
+        arr_reclass[ np.isin(arr, S) ] = 8
+
+        return arr_reclass
+
 class dataset_of2others():
     def __init__(self, arr):
         self.arr = arr
@@ -570,6 +603,24 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
         newdataset = np.expand_dims(newdataset, axis=3)
 
         labels = np.append(labels, newdataset, axis=3)
+
+        ### reclass MCD12Q1v6raw_LCProp2 ###
+        MCD12Q1v6raw_LCProp2_reclass = major_MCD12Q1v6_LCProp2.MODIS(labels[ :, :, :, 4])
+        newdataset_frac = np.expand_dims(MCD12Q1v6raw_LCProp2_reclass, axis=3)
+
+        labels = np.append(labels, newdataset_frac, axis=3)
+
+        ### reclass MCD12Q1v6stable01to15_LCProp2###
+        MCD12Q1v6stable01to15_LCProp2_reclass = major_MCD12Q1v6_LCProp2.MODIS(labels[ :, :, :, 5])
+        newdataset_frac = np.expand_dims(MCD12Q1v6stable01to15_LCProp2_reclass, axis=3)
+
+        labels = np.append(labels, newdataset_frac, axis=3)
+
+        ### reclass MCD12Q1v6stable01to15_LCProp2###
+        MCD12Q1v6stable01to03_LCProp2_reclass = major_MCD12Q1v6_LCProp2.MODIS(labels[ :, :, :, 6])
+        newdataset_frac = np.expand_dims(MCD12Q1v6stable01to03_LCProp2_reclass, axis=3)
+
+        labels = np.append(labels, newdataset_frac, axis=3)
 
         #### preprocessing big block to small blocks ###
         x250_r = trans(x250, 'x')
