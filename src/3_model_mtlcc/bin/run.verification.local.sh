@@ -22,7 +22,7 @@
 
 . ./bin/_common.sh
 
-YEARS=(2001 2002 2003)
+YEARS=(2001)
 input=(bands)
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
 PROJECTS=(AMZ)

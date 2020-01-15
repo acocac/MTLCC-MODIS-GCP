@@ -3,12 +3,13 @@
 project=(AMZ)
 experiment=(3_comparison)
 MODELS=(RF)
-REFERENCES=(MCD12Q1v6stable01to03_LCProp2)
-ssize=3000
-trials=100
+REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
+ssize=500
+trials=1
 TRAIN_YEAR='200120022003'
-YEARS=(2001 2002 2003)
-FOLDS=(0 1 2 3 4 5)
+YEARS=(2001)
+#FOLDS=(0 1 2 3 4 5)
+FOLDS=(0)
 
 for reference in ${REFERENCES[@]}; do
 

@@ -12,8 +12,8 @@ trainingInput:
       discreteValues: [8, 16, 24, 32, 40, 48, 56, 64]
     - parameterName: learning_rate
       type: DOUBLE
-      minValue: 0.0001
-      maxValue: 0.1
+      minValue: 1e-6
+      maxValue: 1e-1
       scaleType: UNIT_LOG_SCALE
     - parameterName: epsilon
       type: DOUBLE

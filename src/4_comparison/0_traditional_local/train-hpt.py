@@ -57,6 +57,8 @@ def parse_arguments(argv):
 						help='write out pngs for each tile with prediction, label etc.')
 	parser.add_argument('--fold', type=str, default=None,
 						help='fold')
+	parser.add_argument('-r', '--reference', type=str, required=True,
+						help='Dataset')
 
 	args, _ = parser.parse_known_args(args=argv[1:])
 	return args
@@ -96,7 +98,6 @@ def hyperopt(param_space, X_train, y_train, X_test, y_test, args):
 			clf = SVC(**params)
 		else:
 			return 0
-
 
 		pl = make_pipeline_imb(resampling, clf)
 
@@ -172,11 +173,11 @@ def prep_data(partition, args):
 		if args.classifier == 'SVM':
 			x, ids, y = readSITSData(
 				os.path.join(args.datadir, 'fold{}'.format(args.fold),
-							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)), y, normalise=True)
+							 'fcTS_{}_ssize{}_tyear{}_{}.csv'.format(partition, args.ssize, y, args.reference)), y, normalise=True)
 		else:
 			x, ids, y = readSITSData(
 				os.path.join(args.datadir, 'fold{}'.format(args.fold),
-							 'fcTS_{}_ssize{}_tyear{}_LCfinalmapv6_LCProp2.csv'.format(partition, args.ssize, y)), y)
+							 'fcTS_{}_ssize{}_tyear{}_{}.csv'.format(partition, args.ssize, y, args.reference)), y)
 
 		X.append(x)
 		Y.append(y)
@@ -209,7 +210,7 @@ def run_hyperopt(args):
 	# Output filenames
 	target_period = args.train_on.replace('|', '')
 
-	modeldir = os.path.join(args.modeldir,'{}_ssize{}_trials{}_trainon{}'.format(args.classifier,args.ssize,args.num_eval,target_period),'hpt')
+	modeldir = os.path.join(args.modeldir,'{}_ssize{}_trials{}_trainon{}_{}'.format(args.classifier,args.ssize,args.num_eval,target_period,args.reference),'hpt')
 	args.modeldir = modeldir
 	if not os.path.exists(args.modeldir):
 		os.makedirs(args.modeldir)

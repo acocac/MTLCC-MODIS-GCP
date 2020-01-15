@@ -36,10 +36,21 @@ class classes:
                                 'NH', 'NHCM', 'C',
                                 'S']
 
-    colors_MCD12Q1v6LCProp2 = [ '#ababab', '#f9ffa4', '#69fff8', '#1c0dff',
-                                '#fa0000', '#003f00', '#006c00',
-                                '#e3ff77', '#b6ff05', '#93ce04',
-                                '#77a703', '#dcd159' ]
+    classes_MCD12Q1v6LCProp2_major = ['NoData',
+        'Barren',
+        'Water Bodies',
+        'Urban and Built-up Lands',
+        'Dense Forests',
+        'Open Forests',
+        'Natural Herbaceous',
+        'Herbaceous Croplands',
+        'Shrublands' ]
+
+    shortname_MCD12Q1v6LCProp2_major = ['NoData', 'Ba',
+                                'W', 'Bu',
+                                'DF', 'OF',
+                                'NH', 'C',
+                                'S']
 
 def helpCalcKappa(ctable):
     total = np.sum(ctable)
@@ -259,6 +270,12 @@ if __name__ == '__main__':
             'shortname': classes.shortname_MCD12Q1v6LCProp2,
             'classes': 11,
             'short': 'M11h01to03'
+        },
+        'MCD12Q1v6stable01to03_LCProp2_major': {
+            'labels': classes.classes_MCD12Q1v6LCProp2_major,
+            'shortname': classes.shortname_MCD12Q1v6LCProp2_major,
+            'classes': 8,
+            'short': 'M8h01to03'
         }
     }
 

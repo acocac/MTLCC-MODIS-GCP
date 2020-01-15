@@ -19,7 +19,7 @@ for project in ${PROJECTS[@]}; do
 
                 echo "Downloading data for project $project and year $year and resolution $resolution with patchsize of $psize_500m"
 
-                python 0_query_data.py \
+                python 0_query_data_dl.py \
                     -o=$project \
                     -p=$psize_500m \
                     -y=$year \
