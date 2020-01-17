@@ -1,11 +1,11 @@
 
 #!/bin/bash
 
-YEARS=(2002)
+YEARS=(2001 2002 2003)
 PROJECTS=(AMZ)
-samplingsize=(3000)
+samplingsize=(500)
 PARTITIONS=(train val)
-FOLDS=(0)
+FOLDS=(1 2 3 4)
 storage=(GCloud)
 bucket=('thesis-2019')
 reference='MCD12Q1v6stable01to03_LCProp2_major'
@@ -24,7 +24,7 @@ for project in ${PROJECTS[@]}; do
 
                 logfname="F:/acoca/research/gee/dataset/${project}/comparison/input/_logs/${year}_${partition}_fold${fold}.log"
 
-                echo "Downloading data for project $project and year $year and sampling size of $samplingsize for partition $partition"
+                echo "Downloading data for project $project and year $year and sampling size of $samplingsize for partition $partition with fold $fold"
 
                     python 1_query_data_traditional.py \
                         -o=$project \

@@ -6,9 +6,9 @@ train_year='200120022003'
 experiment=(3_comparison)
 MODELS=(RF)
 ssize=(500)
-cpus=(12)
-FOLDS=(0)
-trials=(1)
+cpus=(4)
+FOLDS=(1 2 3 4)
+trials=(100)
 reference=(MCD12Q1v6stable01to03_LCProp2_major)
 
 for model in ${MODELS[@]}; do

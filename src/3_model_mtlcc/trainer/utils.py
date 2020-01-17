@@ -383,3 +383,21 @@ def convolution(inputs,W,data_format):
     inputs_padded = tf.pad(inputs, paddings, "REFLECT")
 
     return tf.nn.convolution(inputs_padded, W, 'VALID', data_format=data_format)
+
+def schedule_with_warm_restarts(batch_size, num_images, t_0,
+                                t_mul=2.0, m_mul=1.0, alpha=0.0):
+  """Get a learning rate decay with warm restarts.
+  Args:
+    batch_size: the number of examples processed in each training batch.
+    num_images: Total number of images in the training data set.
+    t_0: Number of epochs before initial decay
+  """
+  first_decay_steps = num_images / batch_size * t_0
+
+  def schedule_fn(global_step):
+    global_step = tf.cast(global_step, tf.int32)
+    return tf.train.cosine_decay_restarts(1.0, global_step,
+                                          first_decay_steps=first_decay_steps,
+                                          t_mul=t_mul,
+                                          m_mul=m_mul, alpha=alpha)
+  return schedule_fn

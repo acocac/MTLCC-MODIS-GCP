@@ -6,7 +6,7 @@ NOW="$(get_date_time)"
 INPUT_BUCKET="gs://${BUCKET_NAME}"
 OUTPUT_BUCKET="gs://${BUCKET_NAME}"
 TRAINING_JOB_NAME="${PROJECT}_hpt_train_${NOW}"
-INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/gz/${PZISE_train}"
+INPUT_PATH="${INPUT_BUCKET}/${PROJECT}/${PZISE_train}"
 MODEL_PATH="${OUTPUT_BUCKET}/${TRAINING_JOB_NAME}"
 EPOCHS=10
 TRAIN_YEAR='2001 2002 2003'
@@ -34,5 +34,5 @@ gcloud ai-platform jobs submit training "${TRAINING_JOB_NAME}" \
   --reference ${REFERENCE}
 
 #  --limit_batches 2 \
-
+#p100
 #echo "Upon completion, serve the model by running: bin/run.serve.sh ${NOW}"

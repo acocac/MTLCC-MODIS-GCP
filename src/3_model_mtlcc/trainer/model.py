@@ -13,7 +13,6 @@ from trainer import utils
 from tensorflow.contrib.rnn import LSTMStateTuple
 
 from tensorflow.contrib.layers import batch_norm, flatten
-# from tensorflow.layers import batch_normalization, flatten
 from tensorflow.contrib.framework import arg_scope
 
 ## hyper parameters ##
@@ -77,6 +76,7 @@ FLAGS = tf.app.flags.FLAGS
 MODEL_CFG_FILENAME = 'params.ini'
 
 ADVANCED_SUMMARY_COLLECTION_NAME="advanced_summaries"
+
 
 def inference(input, is_train=True, num_classes=None):
     x, sequence_lengths = input
@@ -152,6 +152,50 @@ def loss(logits, labels, mask, name):
     return tf.reduce_mean(lpp, name=name)
 
 
+def softmax_focal_loss(logits, labels, mask, gamma, alpha, name):
+    #TODO focal max method1
+    #source: https://github.com/fuyw/Grace/blob/76bc27230fef581ae90f12a267764ac176637ba9/utils.py
+    loss_per_px = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels, logits=logits)
+
+    pred_y = tf.nn.softmax(logits, axis=-1)
+    p_t = labels * pred_y + (1 - labels) * (1 - pred_y)
+    p_t = tf.reduce_max(pred_y*labels, axis=-1)
+    modulating_factor = tf.pow(1.0 - p_t, gamma)
+    focal_loss = modulating_factor * alpha * loss_per_px
+
+    # _ = tf.identity(focal_loss, name="loss_per_px")
+    # _ = tf.identity(mask, name="mask_per_px")
+    #
+    # flpp = tf.boolean_mask(focal_loss, mask)
+
+    mask = tf.cast(mask, dtype=tf.float32)
+    mask /= tf.reduce_mean(mask)
+    focal_loss *= mask
+
+    # return tf.reduce_mean(flpp, name=name)
+    return tf.reduce_mean(focal_loss, name=name)
+
+
+def _focal_loss(logits, labels, ignore_label, gamma, alpha, name):
+    #TODO focal max method1
+    # labels = tf.to_int64(labels)
+    # labels = tf.convert_to_tensor(labels, tf.int64)
+    # logits = tf.convert_to_tensor(logits, tf.float32)
+    num_classes = logits.get_shape().as_list()[-1]
+    one_hot_target = tf.one_hot(tf.cast(labels, tf.int32),
+                            num_classes, on_value=1.0, off_value=0.0)
+    one_hot_target = tf.squeeze(one_hot_target, axis=[3])
+    model_out = logits #tf.add(logits, epsilon)
+    ce = tf.multiply(one_hot_target, -tf.log(tf.clip_by_value(model_out, 1.e-5,1.0)))
+    weight = tf.multiply(one_hot_target, tf.pow(tf.subtract(1., model_out), gamma))
+    fl = tf.multiply(alpha, tf.multiply(weight, ce))
+    reduced_fl = tf.reduce_max(fl, axis=-1, keepdims=True)
+    not_ignore_mask = tf.to_float(
+                tf.not_equal(labels, ignore_label))
+    # reduced_fl = tf.reduce_sum(fl, axis=1)  # same as reduce_max
+    return tf.reduce_mean(reduced_fl * not_ignore_mask, name=name)
+
+
 def optimize(loss, global_step, otype, name):
     lr = tf.compat.v1.placeholder_with_default(FLAGS.learning_rate, shape=(), name="learning_rate")
     beta1 = tf.compat.v1.placeholder_with_default(FLAGS.beta1, shape=(), name="beta1")
@@ -166,6 +210,12 @@ def optimize(loss, global_step, otype, name):
         optimizer = tf.contrib.opt.NadamOptimizer(
             learning_rate=lr, beta1=beta1, beta2=beta2,
             epsilon=FLAGS.epsilon
+        )
+    elif otype == "adamW":
+        ##TODO - need further work
+        optimizer = tf.contrib.opt.AdamWOptimizer(
+            learning_rate=lr, beta1=beta1, beta2=beta2,
+            epsilon=FLAGS.epsilon, weight_decay=FLAGS.weight_decay
         )
 
     # method 1
@@ -464,6 +514,7 @@ def _model_fn(features, labels, mode, params):
       global_step = tf.compat.v1.train.get_or_create_global_step()
 
       loss_op = loss(logits=logits, labels=labels, mask=not_unknown_mask, name="loss")
+      # loss_op = softmax_focal_loss(logits=logits, labels=labels, mask=not_unknown_mask, gamma=2, alpha=0.25, name="loss")
 
       ao_ops = eval_oa(logits=logits, labels=labels, mask=not_unknown_mask)
       summary(ao_ops[0], loss_op)

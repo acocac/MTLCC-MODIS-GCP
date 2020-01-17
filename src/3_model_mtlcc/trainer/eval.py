@@ -144,8 +144,9 @@ def train_and_evaluate(args):
 
             files = filenames[stepfrom:stepto]
 
-            pred = next(predictions)['pred']
-            pred_sc = next(predictions)['pred_sc']
+            pred_out = next(predictions)
+            pred = pred_out['pred']
+            pred_sc = pred_out['pred_sc']
 
             pred = pred + 1
 

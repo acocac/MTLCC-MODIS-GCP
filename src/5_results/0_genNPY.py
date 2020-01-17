@@ -41,7 +41,6 @@ def eval(args):
 
     pred_list = glob.glob(os.path.join(args.preddir, '*.tif'))
     verdir_list = glob.glob(os.path.join(args.verdir, '*.tif'))
-
     assert(len(pred_list) == len(verdir_list))
 
     # Read all data as a list of numpy arrays

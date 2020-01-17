@@ -26,11 +26,16 @@
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
 YEARS=(2001)
 BS=1
+
 CELL=(48)
 LAYERS=(1)
-LR=(0.0134547146203)
-TRIALID=(AMZ_hpt_train_20200105104429)
-BESTTRIAL=(20)
+LR=(0.0022)
+optimizertype=(adam)
+experiment=(bands)
+epsilon=1e-8
+
+TRIALID=(loss)
+BESTTRIAL=(ce)
 experiment=(bands)
 
 for reference in ${REFERENCES[@]}; do
@@ -61,6 +66,8 @@ for reference in ${REFERENCES[@]}; do
           --experiment ${experiment} \
           --writetiles \
           --step 'evaluation' \
+          --optimizertype ${optimizertype} \
+          --epsilon ${epsilon} \
           --batchsize ${BS} > $logfname 2>&1
 
     done

@@ -1,6 +1,6 @@
 trainingInput:
   hyperparameters:
-    maxTrials: 3
+    maxTrials: 5
     maxParallelTrials: 1
 #    resumePreviousJobId: AMZ_hpt_train_20200107174826
     enableTrialEarlyStopping: True
@@ -9,16 +9,11 @@ trainingInput:
     params:
     - parameterName: batchsize
       type: DISCRETE
-      discreteValues: [8, 16, 24, 32, 40, 48, 56, 64]
+      discreteValues: [8, 16, 24, 32, 40]
     - parameterName: learning_rate
       type: DOUBLE
-      minValue: 1e-6
-      maxValue: 1e-1
-      scaleType: UNIT_LOG_SCALE
-    - parameterName: epsilon
-      type: DOUBLE
-      minValue: 1e-8
-      maxValue: 1e-4
+      minValue: 0.00001
+      maxValue: 0.1
       scaleType: UNIT_LOG_SCALE
     - parameterName: convrnn_filters
       type: DISCRETE

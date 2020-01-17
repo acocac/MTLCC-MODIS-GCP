@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SCALE_TIER="CUSTOM"
-MASTER_MACHINE="large_model_v100" #complex_model_m_gpu standard_gpu
 MODEL_NAME="mtlcc"
 HPTUNING_CONFIG="trainer/hptuning_config.yaml"
 BUCKET_NAME="thesis-2019"

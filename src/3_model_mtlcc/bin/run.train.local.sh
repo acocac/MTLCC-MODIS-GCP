@@ -33,12 +33,11 @@ REFERENCE="MCD12Q1v6stable01to03_LCProp2_major"
 
 LAYERS=(1)
 
-BS=(24)
-CELL=(48)
-LR=(0.0022)
+BS=(32)
+CELL=(64)
+LR=(0.01)
 optimizertype=(adam)
 experiment=(bands)
-epsilon=1e-4
 
 mkdir -p "${MODEL_DIR}/_logs"
 logfname="${MODEL_DIR}/_logs/log.log"
@@ -60,9 +59,6 @@ gcloud ai-platform local train \
   --reference $REFERENCE \
   --experiment ${experiment} \
   --optimizertype ${optimizertype} \
-  --epsilon ${epsilon} \
   --batchsize ${BS} > $logfname 2>&1
 
-echo "Upon completion, serve the model by running: bin/run.serve.local.sh"
-
-#  --limit_batches 1
+echo "Finish.."
