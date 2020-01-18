@@ -69,13 +69,13 @@ class major_MCD12Q1v6_LCProp2():
         a function for aggregating from ESA-CCI classes to simple classes
         """
         ##ESA-CCI to new classes
-        nodata = [0, 2]
+        nodata = [0, 2, 7, 9]
         B = [1]
         W = [3]
         Bu = [4]
         DF = [5]
-        OF = [6, 7]
-        NH = [8, 9]
+        OF = [6]
+        NH = [8]
         C = [10]
         S = [11]
 

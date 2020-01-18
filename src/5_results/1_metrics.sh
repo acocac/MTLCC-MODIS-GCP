@@ -1,14 +1,14 @@
 #!/bin/bash
 
-project=(tile_0_563)
-experiment=(2_gcloud)
-MODELS=(CE)
+project=(AMZ)
+experiment=(3_comparison)
+MODELS=(RF)
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
-ssize=500
+ssize=3000
 trials=100
 TRAIN_YEAR='200120022003'
 YEARS=(2001)
-level=(global)
+level=(perclass)
 folds=(0)
 
 for reference in ${REFERENCES[@]}; do

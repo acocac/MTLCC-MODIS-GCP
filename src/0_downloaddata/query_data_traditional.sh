@@ -1,11 +1,11 @@
 
 #!/bin/bash
 
-YEARS=(2001 2002 2003)
+YEARS=(2001)
 PROJECTS=(AMZ)
-samplingsize=(500)
-PARTITIONS=(train val)
-FOLDS=(1 2 3 4)
+samplingsize=(3000)
+PARTITIONS=(train)
+FOLDS=(4)
 storage=(GCloud)
 bucket=('thesis-2019')
 reference='MCD12Q1v6stable01to03_LCProp2_major'

@@ -6,10 +6,10 @@ experiment=(3_comparison)
 data=(bands)
 MODELS=(RF)
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
-ssize=500
+ssize=3000
 trials=100
 TRAIN_YEAR='200120022003'
-YEARS=(2001)
+YEARS=(2001 2002 2003)
 psize_eval=(384)
 FOLDS=(0)
 

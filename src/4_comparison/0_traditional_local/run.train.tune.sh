@@ -3,12 +3,12 @@
 project=(AMZ)
 TRAIN_YEAR='2001|2002|2003'
 experiment=(3_comparison)
-MODELS=(RF)
+MODELS=(SVM)
 ssize=(3000)
 channels=(7)
 partition=(val)
 cpus=(-1)
-num_eval=(100)
+num_eval=(25)
 reference=(MCD12Q1v6stable01to03_LCProp2_major)
 fold=(0)
 

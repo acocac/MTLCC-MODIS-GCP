@@ -112,7 +112,7 @@ if __name__ == '__main__':
     #### LC map ####
     finalmapv6_LCProp2_ = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2003) + '-12-31', 'LC_Prop2');
     finalmapv6_LCProp2_reclass = finalmapv6_LCProp2_.remap([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-                                      [0, 1, 0, 2, 3, 4, 5, 5, 6, 6, 7, 8])
+                                      [0, 1, 0, 2, 3, 4, 5, 0, 6, 0, 7, 8])
 
     targetmap = finalmapv6_LCProp2_reclass
 
