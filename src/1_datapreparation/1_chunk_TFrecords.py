@@ -796,7 +796,8 @@ if __name__ == '__main__':
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','eval.tileids')),
                 dtype='str').tolist()
 
-            target_tiles = [target_tiles]
+            # target_tiles = [target_tiles]
+            target_tiles = target_tiles
 
             target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
 

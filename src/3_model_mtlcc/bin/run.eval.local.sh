@@ -25,51 +25,52 @@
 
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
 YEARS=(2001)
+FOLDS=(0)
 BS=1
 
-CELL=(48)
+CELL=(64)
 LAYERS=(1)
-LR=(0.0022)
+LR=(2.0367720993e-05)
 optimizertype=(adam)
 experiment=(bands)
-epsilon=1e-8
 
-TRIALID=(loss)
-BESTTRIAL=(ce)
+TRIALID=(AMZ_hpt_train_20200118154937)
+BESTTRIAL=(1)
 experiment=(bands)
 
 for reference in ${REFERENCES[@]}; do
 
-    INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_eval}/multiple"
-    MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/$TRIALID/$BESTTRIAL"
-    STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/$TRIALID/$BESTTRIAL"
+    for fold in ${FOLDS[@]}; do
 
-    for year in ${YEARS[@]}; do
-        echo "Processing project: $PROJECT and year: $year and reference: $reference and trial $TRIALID folder $BESTTRIAL"
+        INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_eval}/multiple"
+        MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud/$TRIALID/$BESTTRIAL"
+        STORE_DIR="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/$TRIALID/$BESTTRIAL"
 
-        mkdir -p "E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference"
-        logfname="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$reference/$year.log"
+        for year in ${YEARS[@]}; do
+            echo "Processing project: $PROJECT and year: $year and reference: $reference and trial $TRIALID folder $BESTTRIAL"
 
-        gcloud ai-platform local train \
-          --module-name trainer.eval \
-          --package-path trainer \
-          -- \
-          --modeldir "${MODEL_DIR}" \
-          --datadir "${INPUT_PATH}" \
-          --storedir "${STORE_DIR}/${year}" \
-          --dataset "${year}" \
-          --reference ${reference} \
-          --pix250m "${PZISE_eval}" \
-          --convrnn_filters ${CELL} \
-          --convrnn_layers ${LAYERS} \
-          --learning_rate ${LR} \
-          --experiment ${experiment} \
-          --writetiles \
-          --step 'evaluation' \
-          --optimizertype ${optimizertype} \
-          --epsilon ${epsilon} \
-          --batchsize ${BS} > $logfname 2>&1
+            mkdir -p "E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$TRIALID/"
+            logfname="E:/acocac/research/${PROJECT}/eval/pred/2_gcloud/_logs/$TRIALID/$BESTTRIAL_$reference_$year.log"
 
+            gcloud ai-platform local train \
+              --module-name trainer.eval \
+              --package-path trainer \
+              -- \
+              --modeldir "${MODEL_DIR}" \
+              --datadir "${INPUT_PATH}" \
+              --storedir "${STORE_DIR}/fold${fold}/${year}" \
+              --dataset "${year}" \
+              --reference ${reference} \
+              --pix250m "${PZISE_eval}" \
+              --convrnn_filters ${CELL} \
+              --convrnn_layers ${LAYERS} \
+              --learning_rate ${LR} \
+              --experiment ${experiment} \
+              --writetiles \
+              --step 'evaluation' \
+              --optimizertype ${optimizertype} \
+              --batchsize ${BS} > $logfname 2>&1
+        done
     done
 done
-#          --writeconfidences \
+#          --writeconfidence

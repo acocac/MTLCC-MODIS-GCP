@@ -14,7 +14,8 @@ parser.add_argument('-o','--outdir', type=str, required=True, help='Outdir dir')
 parser.add_argument('--dataset', type=str, default=None, help='Dataset')
 parser.add_argument('-y','--targetyear', type=str, required=True, help='Target year')
 parser.add_argument('-l','--level', type=str, required=True, help='Level')
-parser.add_argument('-f','--folds', type=list, required=True, help='Folds')
+# parser.add_argument('-f','--folds', type=list, required=True, help='Folds')
+parser.add_argument('-b','--bestmodels', type=list, required=True, help='Best Models')
 
 class classes:
     classes_MCD12Q1v6LCProp2 = ['NoData',
@@ -254,7 +255,7 @@ if __name__ == '__main__':
     outdir = args.outdir
     dataset = args.dataset
     level = args.level
-    folds = args.folds
+    bestmodels = args.bestmodels
 
     def makedir(outfolder):
         if not os.path.exists(outfolder):
@@ -304,9 +305,10 @@ if __name__ == '__main__':
         all_dagrm = []
         ids_all = []
 
-    for i in range(0, len(folds)):
-        quantevalpath = os.path.join(indir, 'fold{}'.format(folds[i]))
-        data = np.load(os.path.join(quantevalpath, 'truepred_{}.npy'.format(args.targetyear)))
+    for i in range(0, len(bestmodels)):
+        quantevalpath = os.path.join(indir, '{}'.format(bestmodels[i]))
+        print(quantevalpath)
+        data = np.load(os.path.join(quantevalpath, args.targetyear, 'truepred_{}.npy'.format(args.targetyear)))
 
         y_true = data[:,0]
         y_pred = data[:,1]

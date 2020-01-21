@@ -12,12 +12,12 @@ trainingInput:
       discreteValues: [8, 16, 24, 32, 40]
     - parameterName: learning_rate
       type: DOUBLE
-      minValue: 0.00001
+      minValue: 0.000001
       maxValue: 0.1
       scaleType: UNIT_LOG_SCALE
     - parameterName: convrnn_filters
       type: DISCRETE
-      discreteValues: [8, 16, 24, 48, 64, 128, 256]
+      discreteValues: [24, 48, 64, 128, 256]
     - parameterName: optimizertype
       type: CATEGORICAL
       categoricalValues: [adam, nadam]

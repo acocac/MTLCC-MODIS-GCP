@@ -1,20 +1,20 @@
 #!/bin/bash
 
 project=(AMZ)
-folds=(0)
-blocks=1
+folds=(0 1 2 3 4)
+blocks=16
 psize=384
-year=2015
+year=2001
 dataset=(multiple)
 REFERENCES=(Copernicusnew_all2ofg)
 
 for reference in ${REFERENCES[@]}; do
     for fold in ${folds[@]}; do
-        mkdir -p "F:/acoca/research/gee/dataset/${project}/MOD09_250m500m/_logs/folds/"
+        mkdir -p "F:/acoca/research/gee/dataset/${project}/_logs/folds/"
         echo "Processing fold $fold and reference $reference"
-        logfname="F:/acoca/research/gee/dataset/${project}/MOD09_250m500m/_logs/folds/${fold}_$reference.log"
-        python _assign_partition_GZfiles_eval.py \
-            --rootdir="F:/acoca/research/gee/dataset/${project}/MOD09_250m500m" \
+        logfname="F:/acoca/research/gee/dataset/${project}/_logs/folds/${fold}_$reference.log"
+        python 3_assign_partition_GZfiles_train.py \
+            --rootdir="F:/acoca/research/gee/dataset/${project}" \
             --tyear=$year \
             --psize=$psize  \
             --blocks=$blocks \

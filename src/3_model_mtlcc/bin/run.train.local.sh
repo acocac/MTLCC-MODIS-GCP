@@ -26,7 +26,7 @@
 INPUT_PATH="F:/acoca/research/gee/dataset/${PROJECT}/gz/${PZISE_train}/multiple"
 MODEL_DIR="E:/acocac/research/${PROJECT}/models/2_gcloud"
 
-EPOCHS=10
+EPOCHS=30
 TRAIN_YEAR='2001 2002 2003'
 #TRAIN_YEAR=(2015)
 REFERENCE="MCD12Q1v6stable01to03_LCProp2_major"

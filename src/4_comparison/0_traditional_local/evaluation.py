@@ -13,13 +13,8 @@ import threading
 
 EVAL_IDS_IDENTIFIER = "eval"
 
-MASK_FOLDERNAME="mask"
-GROUND_TRUTH_FOLDERNAME="ground_truth"
 PREDICTION_FOLDERNAME="prediction"
-LOSS_FOLDERNAME="loss"
 CONFIDENCES_FOLDERNAME="confidences"
-
-TRUE_PRED_FILENAME="truepred.npy"
 
 import numpy as np
 
@@ -58,6 +53,8 @@ def parse_arguments(argv):
                       help='classifier')
   parser.add_argument('--fold', type=str, default=None,
                       help='fold')
+  parser.add_argument('-bm', '--bestmodel', type=int, default=1,
+                      help='int')
 
   args, _ = parser.parse_known_args(args=argv[1:])
 
@@ -69,7 +66,7 @@ def eval(args):
 
     print(args.dataset)
 
-    joblib_file = os.path.join(args.modeldir,'model-{}_fold{}.h5'.format(args.classifier,args.fold))
+    joblib_file = os.path.join(args.modeldir,'model-{}_bm{}.h5'.format(args.classifier,args.bestmodel))
 
     # Load from file
     model = joblib.load(joblib_file)
@@ -95,7 +92,8 @@ def eval(args):
             if not os.path.exists(outfolder):
                 os.makedirs(outfolder)
 
-        makedir(join(args.storedir))
+        # makedir(join(args.storedir))
+        makedir(join(args.storedir, PREDICTION_FOLDERNAME))
 
         try:
             for i in range(0, int(batches)):
@@ -136,7 +134,7 @@ def eval(args):
                         geotransform = dataset.geotransforms[tileid]
                         srid = dataset.srids[tileid]
 
-                        threadlist.append(write_tile(pred[tile], files[tile],args.storedir, geotransform, srid))
+                        threadlist.append(write_tile(pred[tile], files[tile],join(args.storedir, PREDICTION_FOLDERNAME), geotransform, srid))
 
                     # start all write threads!
                     for x in threadlist:

@@ -50,7 +50,7 @@ if __name__ == '__main__':
     train, test, eval = parfiles(tileiddir, fold)
 
     #load merge patch and fileid geojson
-    df_all = gpd.read_file(os.path.join(rootdir, 'geodata','split', str(psize), 'raw', 'geojson','merge.geojson'))
+    df_all = gpd.read_file(os.path.join(rootdir, 'geodata','split', str(psize), 'raw', 'tileid','tileid.geojson'))
 
     #project dir
     projectdir = os.path.join(rootdir, 'gz', str(int(psize / blocks)), 'multiple')

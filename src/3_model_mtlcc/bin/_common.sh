@@ -3,7 +3,7 @@
 SCALE_TIER="CUSTOM"
 MODEL_NAME="mtlcc"
 HPTUNING_CONFIG="trainer/hptuning_config.yaml"
-BUCKET_NAME="thesis-2019"
+BUCKET_NAME="thesis-2020"
 PROJECT="AMZ"
 PZISE_train=24
 PZISE_eval=384

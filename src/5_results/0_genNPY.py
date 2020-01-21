@@ -23,8 +23,8 @@ def parse_arguments(argv):
                       help='directory containing verification "ground truth"')
   parser.add_argument('--dataset', type=str, default='2001',
                       help='dataset (year)')
-  parser.add_argument('--fold', type=str, default=None,
-                      help='fold')
+  parser.add_argument('--bestmodel', type=str, default=None,
+                      help='bestmodel')
 
   args, _ = parser.parse_known_args(args=argv[1:])
 

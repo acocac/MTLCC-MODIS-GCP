@@ -22,10 +22,10 @@
 
 . ./bin/_common.sh
 
-YEARS=(2001 2002 2003)
+YEARS=(2002 2003)
 input=(bands)
 REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
-PROJECTS=(tile_0_563)
+PROJECTS=(AMZ)
 
 for reference in ${REFERENCES[@]}; do
     for project in ${PROJECTS[@]}; do
