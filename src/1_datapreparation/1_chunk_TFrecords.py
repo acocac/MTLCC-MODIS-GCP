@@ -651,7 +651,7 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
             labels_ = [retrans(labels_chunk_data[i], 'label') for i in good_indices]
             labelsfrac_ = [retrans(labelsfrac_chunk_data[i], 'label') for i in good_indices]
 
-        elif exportblocks == "train_forest70" or exportblocks == "eval" or exportblocks == "crossyear":
+        elif exportblocks == "train_forest70" or exportblocks == "eval" or exportblocks == "crossyear" or exportblocks == "pred":
 
             x250_ = [retrans(x250_chunk_data[i], 'x') for i in all_blocks]
             x250aux_ = [retrans(x250aux_chunk_data[i], 'x') for i in all_blocks]
@@ -666,7 +666,7 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
 
             parser.write(outdir_file, x250_[t], x250aux_[t], x500_[t], DOY, year, labels_[t], labelsfrac_[t])
 
-            if exportblocks != "crossyear":
+            if exportblocks != "pred":
                 # export class
                 labels = labels_[t].astype(np.int64)
 
@@ -708,7 +708,7 @@ if __name__ == '__main__':
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    if exportblocks != "crossyear":
+    if exportblocks != "pred":
         class_path = os.path.join(rootdir,'gz',str(int(psize / maxblocks)), dataset,'classes','data' + tyear[2:])
         if not os.path.exists(class_path):
             os.makedirs(class_path)
@@ -760,9 +760,17 @@ if __name__ == '__main__':
 
             target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
 
+
         elif exportblocks == 'eval' or exportblocks == "crossyear":
             target_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','eval.tileids')),
+                dtype='str').tolist()
+
+            target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
+
+        elif exportblocks == 'pred':
+            target_tiles = np.loadtxt(
+                os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','pred.tileids')),
                 dtype='str').tolist()
 
             target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
@@ -794,6 +802,16 @@ if __name__ == '__main__':
         elif exportblocks == 'eval' or exportblocks == "crossyear":
             target_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','eval.tileids')),
+                dtype='str').tolist()
+
+            # target_tiles = [target_tiles]
+            target_tiles = target_tiles
+
+            target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
+
+        elif exportblocks == "pred":
+            target_tiles = np.loadtxt(
+                os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','pred.tileids')),
                 dtype='str').tolist()
 
             # target_tiles = [target_tiles]

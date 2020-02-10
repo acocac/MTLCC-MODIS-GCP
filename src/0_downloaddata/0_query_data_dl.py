@@ -195,7 +195,7 @@ if __name__ == '__main__':
     bucket = args.bucket
 
     #add packages
-    pkg_smooth = require('users/kongdd/public:Math/pkg_smooth.js');
+    # pkg_smooth = require('users/kongdd/public:Math/pkg_smooth.js');
 
     ##input data
     #land cover maps
@@ -220,7 +220,15 @@ if __name__ == '__main__':
     ##AOI
     if outdir == 'AMZ':
         aoi = ee.FeatureCollection('ft:1Tv0-78XXpd0qCWbrylwFWl4Pc3W1vdmnZqiEMmVs', 'geometry'); #RAISG
-        sizeGEE = 300000000
+        if res == "250m_aux":
+            sizeGEE = 1000000000 #avoid bug
+        else:
+            sizeGEE = 300000000
+    elif outdir == 'AMZpred':
+        aoi = ee.FeatureCollection('ft:1Tv0-78XXpd0qCWbrylwFWl4Pc3W1vdmnZqiEMmVs', 'geometry'); #RAISG
+        aoi = aoi.geometry().bounds().buffer(100000)
+        aoi = ee.Feature(aoi)
+        sizeGEE = 1000000000
     elif outdir.startswith("tile_"):
         tiles = ee.FeatureCollection('users/acocacbasic/thesis/model/patchid_AMZ384_250mSpectral')
         _, patch_id, file_id = outdir.split("_")
@@ -236,14 +244,20 @@ if __name__ == '__main__':
     tS = str(tyear) + '-01-01'
     tE = str(tyear) + '-12-31'
 
-    #### MODIS ####
-    rawmapv6_LCType1 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Type1');
+    if tyear <= 2018:
+        #### MODIS ####
+        rawmapv6_LCType1 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Type1');
+        rawmapv6_LCProp1 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Prop1');
+        rawmapv6_LCProp2 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Prop2');
+    else:
+        rawmapv6_LCType1 = filtermap_MODIS(MCD12Q1v6, '2018-01-01', '2018-12-31', 'LC_Type1');
+        rawmapv6_LCProp1 = filtermap_MODIS(MCD12Q1v6, '2018-01-01', '2018-12-31', 'LC_Prop1');
+        rawmapv6_LCProp2 = filtermap_MODIS(MCD12Q1v6, '2018-01-01', '2018-12-31', 'LC_Prop2');
+
     #finalmapv6_LCType1 = filtermap(MCD12Q1v6, str(tyear - 1) + '-01-01', str(tyear + 1) + '-12-31', 'LC_Type1');
     finalmapv6_LCType1 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Type1');
-    rawmapv6_LCProp1 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Prop1');
     #finalmapv6_LCProp1 = filtermap(MCD12Q1v6, str(tyear - 1) + '-01-01', str(tyear + 1) + '-12-31', 'LC_Prop1');
     finalmapv6_LCProp1 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Prop1');
-    rawmapv6_LCProp2 = filtermap_MODIS(MCD12Q1v6, tS, tE, 'LC_Prop2');
     #finalmapv6_LCProp2 = filtermap(MCD12Q1v6, str(tyear - 1) + '-01-01', str(tyear + 1) + '-12-31', 'LC_Prop2');
     finalmapv6_LCProp2_01to15 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Prop2');
     finalmapv6_LCProp2_01to03 = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2003) + '-12-31', 'LC_Prop2');

@@ -277,6 +277,12 @@ if __name__ == '__main__':
             'shortname': classes.shortname_MCD12Q1v6LCProp2_major,
             'classes': 8,
             'short': 'M8h01to03'
+        },
+        'MCD12Q1v6stable01to15_LCProp2_major': {
+            'labels': classes.classes_MCD12Q1v6LCProp2_major,
+            'shortname': classes.shortname_MCD12Q1v6LCProp2_major,
+            'classes': 8,
+            'short': 'M8h01to15'
         }
     }
 

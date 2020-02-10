@@ -154,7 +154,7 @@ class Dataset():
   """ A wrapper class around Tensorflow Dataset api handling data normalization and augmentation """
 
   def __init__(self, datadir, verbose=False, temporal_samples=None, section="dataset", augment=False, experiment="bands",
-               reference="MCD12Q1v6stable01to03_LCProp2_major", step="training"):
+               reference="MCD12Q1v6stable01to15_LCProp2_major", step="training"):
     self.verbose = verbose
 
     self.augment = augment

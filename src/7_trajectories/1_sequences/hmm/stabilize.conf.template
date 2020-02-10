@@ -1,0 +1,28 @@
+# Configuration file for Markov chain stabilizer
+
+# File patterns for input and output files. Pattern {TILE} will be
+# replaced with the tile identifier, and {YEAR} will be replaced with
+# a four digit year to form a file path for each input file.
+in_pattern: /projectnb/modislc/users/dsm/probability_layers/ap_{YEAR}/igbp.probs.{TILE}
+out_pattern_map: processed/igbp.{TILE}.{YEAR}.map.bsq
+out_pattern_probs: processed/igbp.{TILE}.{YEAR}.probs.bsq
+
+# File pattern for land/water mask rasters
+lw_mask_pattern: /projectnb/modislc/data/mcd12_in/c6/ancillary_layers/C6_LW_Mask/lw_mask_500m/LW.map.{TILE}
+
+# First and last years of the time series.
+start_year: 2001
+end_year: 2012
+
+# Number of labels in the classification scheme. Input probability
+# rasters are expected to have this number of bands.
+n_labels: 17
+
+# Prior probability for class transition from one year to the next.
+transition_prior: 0.1
+
+# Algorithm to apply to the Markov chain to determine the best
+# sequence of labels.
+#
+# Available algorithms are 'forward', 'forward_backward', and 'viterbi'.
+algorithm: forward_backward

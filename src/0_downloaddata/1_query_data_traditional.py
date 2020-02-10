@@ -110,7 +110,13 @@ if __name__ == '__main__':
     tE = str(tyear) + '-12-31'
 
     #### LC map ####
-    finalmapv6_LCProp2_ = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2003) + '-12-31', 'LC_Prop2');
+    if reference == 'MCD12Q1v6stable01to03_LCProp2_major':
+        finalmapv6_LCProp2_ = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2003) + '-12-31', 'LC_Prop2')
+        print(str(2003) + '-12-31', 'LC_Prop2')
+    elif reference == 'MCD12Q1v6stable01to15_LCProp2_major':
+        finalmapv6_LCProp2_ = filtermap_MODIS(MCD12Q1v6, str(2001) + '-01-01', str(2015) + '-12-31', 'LC_Prop2')
+        print(str(2015) + '-12-31', 'LC_Prop2')
+
     finalmapv6_LCProp2_reclass = finalmapv6_LCProp2_.remap([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                                       [0, 1, 0, 2, 3, 4, 5, 0, 6, 0, 7, 8])
 
@@ -158,7 +164,6 @@ if __name__ == '__main__':
 
     #extract
     ni = MODIS_coll_filled.toArray()
-    print(ni.bandNames().getInfo())
 
     trainCollection = ni.select(['array']).sampleRegions(
         collection=samples,
@@ -185,15 +190,15 @@ if __name__ == '__main__':
                         bucket=bucket,
                         fileFormat='CSV')
 
-        try:
-                task.start()
-                ##        print(task.status())
-                if storage == 'Gdrive':
-                    print('Exporting in CSV format {} samples (instances) per class available for period {} to {} and storing into GDrive {} folder'.format(instances, tS, tE,outdir))
-                else:
-                    print('Exporting in CSV format {} samples (instances) per class available for period {} to {} and storing into GCloud Bucket gs://{}/{} folder'.format(instances, tS, tE, bucket, outfile))
-                print(task.status())
-                time.sleep(30)
+    try:
+        task.start()
+        ##        print(task.status())
+        if storage == 'Gdrive':
+            print('Exporting in CSV format {} samples (instances) per class available for period {} to {} and storing into GDrive {} folder'.format(instances, tS, tE,outdir))
+        else:
+            print('Exporting in CSV format {} samples (instances) per class available for period {} to {} and storing into GCloud Bucket gs://{}/{} folder'.format(instances, tS, tE, bucket, outfile))
+        print(task.status())
+        time.sleep(30)
 
-        except Exception as str_error:
-                print("Error ", str_error)
+    except Exception as str_error:
+        print("Error ", str_error)

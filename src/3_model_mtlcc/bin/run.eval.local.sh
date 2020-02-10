@@ -23,19 +23,19 @@
 
 . ./bin/_common.sh
 
-REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
-YEARS=(2001)
+REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)
+YEARS=(2001 2002 2003)
 FOLDS=(0)
 BS=1
 
-CELL=(64)
+CELL=(128)
 LAYERS=(1)
-LR=(2.0367720993e-05)
-optimizertype=(adam)
+LR=( 0.0607941677442)
+optimizertype=(nadam)
 experiment=(bands)
 
-TRIALID=(AMZ_hpt_train_20200118154937)
-BESTTRIAL=(1)
+TRIALID=(AMZ_hpt_train_20200123131058)
+BESTTRIAL=(11)
 experiment=(bands)
 
 for reference in ${REFERENCES[@]}; do
@@ -58,9 +58,9 @@ for reference in ${REFERENCES[@]}; do
               -- \
               --modeldir "${MODEL_DIR}" \
               --datadir "${INPUT_PATH}" \
-              --storedir "${STORE_DIR}/fold${fold}/${year}" \
+              --storedir "${STORE_DIR}/${year}" \
               --dataset "${year}" \
-              --reference ${reference} \
+              --reference "${reference}" \
               --pix250m "${PZISE_eval}" \
               --convrnn_filters ${CELL} \
               --convrnn_layers ${LAYERS} \

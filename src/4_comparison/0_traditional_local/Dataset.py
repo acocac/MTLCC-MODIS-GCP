@@ -191,12 +191,12 @@ class Dataset():
       # e.g. test240_fold0.tileids
       path = os.path.join(self.tileidfolder, traintest.format(partition=partition, fold=fold))
       return readids(path)
-    elif partition == 'eval':
+    elif partition == 'eval' or partition == 'pred':
       # e.g. eval240.tileids
       path = os.path.join(self.tileidfolder, eval.format(partition=partition))
       return readids(path)
     else:
-      raise ValueError("please provide valid partition (train|test|eval)")
+      raise ValueError("please provide valid partition (train|test|eval|pred)")
 
   def create_tf_dataset(self, partition, fold, batchsize, prefetch_batches=None, num_batches=-1, threads=8,
                         drop_remainder=False, overwrite_ids=None):

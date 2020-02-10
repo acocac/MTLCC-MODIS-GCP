@@ -1,18 +1,18 @@
 
 #!/bin/bash
 
-YEARS=(2001 2003)
+YEARS=(2019)
 PROJECTS=(AMZ)
 psize=(384)
-RESOLUTIONS=(250m_spectral 250m_aux 500m_spectral) #250m_spectral 250m_aux 500m_spectral
+RESOLUTIONS=(250m_aux) #250m_spectral 250m_aux 500m_spectral
 storage=(GCloud)
-bucket=('thesis-2019')
+bucket=('thesis-2020')
 
 for project in ${PROJECTS[@]}; do
     mkdir -p "F:/acoca/research/gee/dataset/$project/_logs"
     for year in ${YEARS[@]}; do
         for resolution in ${RESOLUTIONS[@]}; do
-            logfname="F:/acoca/research/gee/dataset/${project}/_logs/$year.log"
+            logfname="F:/acoca/research/gee/dataset/${project}/_logs/${year}_download.log"
 
             if [ "$resolution" = "500m_spectral" ]; then
                 psize_500m=$(($psize / 2))
@@ -32,7 +32,7 @@ for project in ${PROJECTS[@]}; do
 
                 echo "Downloading data for project $project and year $year and resolution $resolution with patchsize of $psize"
 
-                python 0_query_data.py \
+                python 0_query_data_dl.py \
                     -o=$project \
                     -p=$psize_250m \
                     -y=$year \

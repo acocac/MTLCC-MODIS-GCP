@@ -41,7 +41,8 @@ tf.app.flags.DEFINE_string("aggr_strat", "state",
 tf.app.flags.DEFINE_float("learning_rate", None, "Adam learning rate")
 tf.app.flags.DEFINE_float("beta1", 0.9, "Adam beta1")
 tf.app.flags.DEFINE_float("beta2", 0.999, "Adam beta2")
-tf.app.flags.DEFINE_float("epsilon", 1e-08, "Adam epsilon")
+tf.app.flags.DEFINE_float("epsilon", 1e-8, "Adam epsilon")
+# tf.app.flags.DEFINE_float("epsilon", 0.9, "Adam epsilon")
 
 ## expected data format ##
 tf.app.flags.DEFINE_string("expected_datatypes",

@@ -1,15 +1,17 @@
-import os
 import argparse
-import Dataset
-import tensorflow as tf
-
-import sys
-from osgeo import gdal, osr
-from os.path import join
-from sklearn.externals import joblib
 import math
-
+import os
+import sys
 import threading
+from os.path import join
+import glob
+
+import tensorflow as tf
+from osgeo import gdal, osr
+from sklearn.externals import joblib
+from pathlib import Path
+
+import Dataset
 
 EVAL_IDS_IDENTIFIER = "eval"
 
@@ -61,6 +63,11 @@ def parse_arguments(argv):
   return args
 
 
+def normalize_fixed(X, min_per, max_per):
+    x_normed = (X-min_per) / (max_per-min_per)
+    return x_normed
+
+
 def eval(args):
     assert args.experiment
 
@@ -79,9 +86,18 @@ def eval(args):
                                                            prefetch_batches=args.prefetch)
     iterator = tfdataset.make_one_shot_iterator()
 
+    ##check existing files
+    fileNames_done = [Path(x).stem for x in glob.glob(os.path.join(args.storedir, PREDICTION_FOLDERNAME,'*.tif'))]
+    if len(fileNames_done) > 0:
+        fileNames_target = [Path(x).stem for x in filenames]
+
+        files_process = set(fileNames_target).difference(fileNames_done)
+        filenames = [os.path.join(os.path.dirname(filenames[0]),x + '.gz') for x in files_process]
+
     num_samples = len(filenames)
 
     batches = num_samples / args.batchsize
+
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = args.allow_growth
@@ -110,6 +126,11 @@ def eval(args):
                     X = x_tile
 
                 doy = np.array(range(1, 365, 8))
+
+                if args.classifier == 'SVM':
+                    X = normalize_fixed(X, -100, 16000)
+                    doy = doy / 365
+
                 X = [np.concatenate([X[t], doy]) for t in range(X.shape[0])]
                 X = np.array(X)
 

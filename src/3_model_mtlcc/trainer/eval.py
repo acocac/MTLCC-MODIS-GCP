@@ -50,8 +50,8 @@ def parse_arguments(argv):
   parser.add_argument('--limit_batches', type=int, default=-1,
                       help="artificially reduce number of batches to encourage overfitting (for debugging)")
   parser.add_argument('-exp', '--experiment', type=str, default="bands", help='Experiment to train')
-  parser.add_argument('-ref', '--reference', type=str, default="MCD12Q1v6raw_LCType1",
-                      help='Reference dataset to train')
+  parser.add_argument('-ref', '--reference', type=str, default="MCD12Q1v6stable01to15_LCProp2_major",
+                      help='Reference dataset to eval')
   parser.add_argument('--storedir', type=str, default="tmp", help="directory to store tiles")
   parser.add_argument('-wt', '--writetiles', action="store_true",
                       help='write out pngs for each tile with prediction, label etc.')
@@ -95,6 +95,8 @@ def train_and_evaluate(args):
     with file_io.FileIO(cfgpath, 'r') as f:  # gcp
       datacfg.read_file(f)
     cfg = datacfg['flags']
+
+    print(args.convrnn_filters, args.convrnn_layers, args.learning_rate)
 
     args.convrnn_filters = cfg['convrnn_filters']
     args.convrnn_layers = cfg['convrnn_layers']

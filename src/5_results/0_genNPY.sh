@@ -1,16 +1,16 @@
 #!/bin/bash
 
 project=(AMZ)
-experiment=(3_comparison)
-MODELS=(RF)
-REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
+experiment=(4_local)
+MODELS=(convgru)
+REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)
 ssize=3000
-trials=100
+trials=25
 TRAIN_YEAR='200120022003'
 YEARS=(2001 2002 2003)
 #FOLDS=(0 1 2 3 4 5)
 fold=(0)
-BESTMODELS=(1 2 3)
+BESTMODELS=(4 5)
 
 for reference in ${REFERENCES[@]}; do
 

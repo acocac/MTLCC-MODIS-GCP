@@ -3,10 +3,10 @@
 
 YEARS=(2001 2002 2003)
 PROJECTS=(AMZ)
-samplingsize=(3000)
+samplingsize=(500)
 PARTITIONS=(train val)
-FOLDS=(1 2 3 4)
-storage=(GCloud)
+FOLDS=(0)
+storage=(Gdrive)
 bucket=('thesis-2020')
 reference='MCD12Q1v6stable01to03_LCProp2_major'
 

@@ -26,8 +26,8 @@ config = tf.ConfigProto(
 # config.gpu_options.allow_growth = True
 
 import numpy as np
-import os
 import sys
+import re
 import glob
 import argparse
 
@@ -229,17 +229,19 @@ if __name__ == '__main__':
 
     options = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.GZIP)
 
+    fileNames_250m_spectral = glob.glob(os.path.join(rootdir,'raw','250m_spectral','p' + str(psize) + 'k0','data' + tyear[2:],'*.gz'))
+    fileNames_500m_spectral = glob.glob(os.path.join(rootdir,'raw','500m_spectral','p' + str(int(psize/2)) + 'k0','data' + tyear[2:],'*.gz'))
+    fileNames_250m_aux = glob.glob(os.path.join(rootdir,'raw','250m_aux','p' + str(psize) + 'k0','data' + tyear[2:],'*.gz'))
 
-    fileNames_250m_spectral = sorted(glob.glob(os.path.join(rootdir,'raw','250m_spectral','p' + str(psize) + 'k0','data' + tyear[2:],'*.gz')),key=os.path.getctime)
-    fileNames_500m_spectral = sorted(glob.glob(os.path.join(rootdir,'raw','500m_spectral','p' + str(int(psize/2)) + 'k0','data' + tyear[2:],'*.gz')),key=os.path.getctime)
-    fileNames_250m_aux = sorted(glob.glob(os.path.join(rootdir,'raw','250m_aux','p' + str(psize) + 'k0','data' + tyear[2:],'*.gz')),key=os.path.getctime)
+    #sort dataframe by numeric format
+    fileNames_250m_spectral.sort(key=lambda f: int(re.sub('\D', '', f)))
+    fileNames_500m_spectral.sort(key=lambda f: int(re.sub('\D', '', f)))
+    fileNames_250m_aux.sort(key=lambda f: int(re.sub('\D', '', f)))
 
     n_patches_first = sum(1 for _ in tf.python_io.tf_record_iterator(fileNames_250m_spectral[0], options=options))
     n_patches_last = sum(1 for _ in tf.python_io.tf_record_iterator(fileNames_250m_spectral[-1], options=options))
 
     batchsize_merge = n_patches_first
-
-    print(batchsize_merge)
 
     tfiles_250m_spectral = (n_patches_first * (len(fileNames_250m_spectral)-1)) + n_patches_last
 

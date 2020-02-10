@@ -9,8 +9,8 @@ ssize=(3000)
 cpus=(-1)
 fold=0
 trials=(25)
-BESTMODELS=(1 2 3)
-reference=(MCD12Q1v6stable01to03_LCProp2_major)
+BESTMODELS=(5)
+reference=(MCD12Q1v6stable01to15_LCProp2_major)
 
 for model in ${MODELS[@]}; do
     for bestmodel in ${BESTMODELS[@]}; do

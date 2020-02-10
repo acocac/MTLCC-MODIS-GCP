@@ -64,6 +64,8 @@ def eval(args):
                 stepto = stepfrom + args.batchsize + 1
 
                 files = filenames[stepfrom:stepto]
+                print(files)
+
 
                 if args.writetiles:
 
@@ -72,7 +74,6 @@ def eval(args):
                     for tile in range(label.shape[0]):
 #ac                        tileid = int(os.path.basename(files[tile]).split(".")[0])
                         tileid = str(os.path.basename(files[tile]).split(".")[0])
-
                         geotransform = dataset.geotransforms[tileid]
                         srid = dataset.srids[tileid]
 
