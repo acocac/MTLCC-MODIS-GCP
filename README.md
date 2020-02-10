@@ -29,7 +29,9 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 ### Acknowledgements
 The author acknowledges Marc Rußwurm for a constant feedback of this implementation derived from his original repository. 
 
-This development is part of my on-going PhD titled ["Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas"](https://www.kcl.ac.uk/people/alejandro-coca-castro) at King's College London (KCL) supervised by Dr. Mark Mulligan (first supervisor at KCL) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT).
+This development is part of my on-going PhD titled ["Modelling pan-tropical land cover and land-use change trajectories of newly deforested areas"](https://www.kcl.ac.uk/people/alejandro-coca-castro) at King's College London (KCL) supervised by Dr. Mark Mulligan (first supervisor at KCL) and Dr. Louis Reymondin (co-supervisor at the International Center for Tropical Agriculture - CIAT). 
+
+Finally, thanks to Google, in particular Google Cloud Platform Education Grants Team, research credits were awarded to conduct this implementation using GCP.
 
 ### Future work
 * Enable TPU-processing, using TPUestimator.
