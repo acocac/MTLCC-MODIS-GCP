@@ -380,10 +380,10 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
   }
   else if (ratio == 0){
     if ((dim(tab.stable)[1] > 0) & (dim(tab.stable)[1] > 0)){
-      outputs = list('tabseqstable'=tab.stable.seq, 'tabseqnonstable'=tab.nonstable.seq, 'tyear'=tyear)
+      outputs = list('tabseqstable'=tab.stable.seq, 'tabseqnonstable'=tab.nonstable.seq, 'tyear'=tyear, 'tab.nonstable'=tab.nonstable)
     }
     else if ((dim(tab.stable)[1] == 0) & (dim(tab.nonstable)[1] > 0)){
-        outputs = list('tabseqnonstable'=tab.nonstable.seq, 'tyear'=tyear)
+        outputs = list('tabseqnonstable'=tab.nonstable.seq, 'tyear'=tyear, 'tyear'=tyear, 'tab.nonstable'=tab.nonstable)
     }
     else if ((dim(tab.stable)[1] > 0) & (dim(tab.nonstable)[1] == 0)){
         outputs = list('tabseqstable'=tab.stable.seq, 'tyear'=tyear)
@@ -394,7 +394,7 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
 
 # dataset
 tiles <- c('AMZ')
-targetyears = c(2005:2018)
+targetyears = c(2004:2018)
 lc_target_years <-c(2001,2019)
 
 for (j in targetyears){
@@ -440,7 +440,7 @@ for (j in targetyears){
       for (scheme in schemes){
         if (trat == 'mtlcc'){
           # post filest
-          dir <- paste0("F:/acoca/research/gee/dataset/",tile,"/trajectories/ep15")
+          dir <- paste0("F:/acoca/research/gee/dataset/",tile,"/trajectories/ep30")
         } else if (trat == 'mapbiomas') {
           dir <- paste0("E:/acocac/research/",tile,"/trajectories/mapbiomas")
         }

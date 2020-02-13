@@ -7,13 +7,13 @@ nworkers=(0)
 logdir="F:/acoca/research/gee/dataset/${project}/trajectories/_logs/"
 mkdir -p $logdir
 
-echo "Creating LC data for year(s): $years"
-logfname="${logdir}/mtlcc.log"
+echo "Creating AUX data for year(s): $years"
+logfname="${logdir}/aux2.log"
 
-python 1_prepare_LC_byyear.py \
-        --preddir="F:/acoca/research/gee/dataset/${project}/prediction" \
+python 2_prepare_AUX_byyear.py \
+        --preddir="F:/acoca/research/gee/dataset/${project}/implementation/ep30/ancillary" \
         --auxdir="F:/acoca/research/gee/dataset/${project}/implementation" \
-        --outdir="F:/acoca/research/gee/dataset/${project}/trajectories/ep30" \
+        --outdir="F:/acoca/research/gee/dataset/${project}/trajectories/ep30/aux" \
         --targetyear $years \
         --nworkers $nworkers \
     	--noconfirm > $logfname 2>&1

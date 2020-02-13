@@ -1,15 +1,7 @@
 # Working directory and libraries
 library(TraMineR)
 library(raster)
-library(reshape2)
-library(sampling)
 library(tidyr)
-library(plyr)
-library(rlist)
-require(rasterVis)
-library(maptools)
-library(classInt)
-library(dplyr)
 
 seqfreqidx <- function(seqobj, quantile) { #'most common row'
   #determine frequency
@@ -103,36 +95,15 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
     tab.seq.s <- seqdef(tab.seq, alphabet = alph.s, states = target_short.s,
                         labels = target_classes.s, cpal = target_colors.s,with.missing = TRUE)
 
-
-  } else if (tyear == 2004) {
+  } else if (tyear <= 2006) {
 
     #order distriplot by major
     tab.seq <- seqdef(tab, 3:(length(yearls)+2), alphabet = alphabet, states = short_labels,
                       cpal = palette, labels = short_labels, with.missing = TRUE)
+    
     ## Get state freq with seqmeant
     ## order of frequencies
-    ord <- c(2, 3, 4, 1)
-    
-    ## Sorted alphabet
-    alph.s <- c("DF", "OF", "Fm", "W")
-    
-    ## we need also to sort accordingly labels and colors
-    target_classes.s <- target_classes[ord]
-    target_short.s <- target_short[ord]
-    target_colors.s <- target_colors[ord]
-
-    ## Define sequence object with sorted states
-    tab.seq.s <- seqdef(tab.seq, alphabet = alph.s, states = target_short.s,
-                        labels = target_classes.s, cpal = target_colors.s,with.missing = TRUE)
-
-
-  } else {
-    
-    tab.seq <- seqdef(tab, 3:(length(yearls)+2), alphabet = alphabet, states = short_labels,
-                      cpal = palette, labels = short_labels, with.missing = TRUE)
-    
-    ## order of frequencies
-    ord <- c(3, 4, 5, 2, 1)
+    ord <- c(3, 4, 5, 1, 2)
 
     ## Sorted alphabet
     alph.s <- c("DF", "OF", "Fm", "W", "Bu")
@@ -141,14 +112,13 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
     target_classes.s <- target_classes[ord]
     target_short.s <- target_short[ord]
     target_colors.s <- target_colors[ord]
-    
+
     ## Define sequence object with sorted states
     tab.seq.s <- seqdef(tab.seq, alphabet = alph.s, states = target_short.s,
                         labels = target_classes.s, cpal = target_colors.s,with.missing = TRUE)
-    
-    
-  }
-  
+
+
+  } 
   
   #create stratas
   std.df <- apply(tab[,3:(dim(tab)[2]-1)], 1, sd) 
@@ -248,23 +218,16 @@ tile <- 'AMZ'
 
 #dirs
 indir <- paste0("E:/acocac/research/",tile,"/trajectories/data")
-chart_dir <- paste0("E:/acocac/research/",tile,"/trajectories/charts")
+chart_dir <- paste0("E:/acocac/research/",tile,"/trajectoriesep/charts")
 dir.create(chart_dir, showWarnings = FALSE, recursive = T)
 
-##aux
-aux_dir <- "F:/acoca/research/gee/dataset/AMZ/implementation"
-proj <- CRS('+proj=longlat +ellps=WGS84')
-
-##Modify next line to your folder
-aoi_shp <- readShapeLines(paste0(aux_dir,'/aoi/amazon_raisg.shp'), proj4string=proj)
-roads_shp <- readShapeLines(paste0(aux_dir,'/ancillary/roads/roads_2012_gROADSv1.shp'), proj4string=proj)
-
 ##analysis with simple classes
-targetyears = c(2004:2018)
+targetyears = c(2004:2006)
 lc_target_years <-c(2001,2019)
 
 for (j in targetyears){
   terrai_target <- j
+  print(terrai_target)
   
   quantile = 0.95
   

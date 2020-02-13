@@ -24,7 +24,7 @@ def run(args):
     hmm_model = mtlchmm.MTLCHMM(method='forward-backward',
                                 transition_prior=0.1,
                                 block_size=2000,
-                                n_jobs=12,
+                                n_jobs=14,
                                 tiled=True,
                                 compress='lzw',
                                 assign_class=True,

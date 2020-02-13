@@ -1,7 +1,7 @@
 
 #!/bin/bash
 
-YEARS=(2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014)
+YEARS=(2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019)
 #YEARS=(2019)
 trainon=(010203)
 epochs=(ep30)
@@ -27,7 +27,7 @@ for reference in ${REFERENCES[@]}; do
                 echo "Processing year: $year and model: $model and split: $split and reference: $reference"
                 logfname="E:/acocac/research/${project}/eval/pred/$experiment/${epochs}/_logs/${model}_ckp${ckp}_fold${split}_${trainon}_${optimizertype}_${reference}/$year.log"
                 python predict.py "E:/acocac/research/${project}/eval/models/$experiment/${epochs}/${model}${cell}_p${psize}pxk0px_batch${batchsize}_${trainon}_${optimizertype}_${reference}_8d_l1_bidir_${input}_fold${split}_ckp${ckp}" \
-                    --datadir="F:/acoca/research/gee/dataset/${project}/combine/${psize}" \
+                    --datadir="T:/BACKUPS/BACKUP_PhDAlejandro/${project}/combine/${psize}" \
                     --storedir="F:/acoca/research/gee/dataset/${project}/eval/pred/$experiment/${epochs}/${model}/${model}${cell}_${trainon}_${optimizertype}_fold${split}_${reference}_${ckp}/$year" \
                     --writetiles \
                     --batchsize=1 \

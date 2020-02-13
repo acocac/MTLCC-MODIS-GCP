@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Create clean LC data for seq analy
 parser.add_argument('-p','--preddir', type=str, required=True,
                     help='Indir dir')
 parser.add_argument('-a','--auxdir', type=str, required=True,
-                    help='Indir dir')
+                    help='Aux dir')
 parser.add_argument('-o','--outdir', type=str, required=True,
                     help='Outdir dir')
 parser.add_argument('-y', '--targetyears', type=int, default="2016", nargs='+',
@@ -88,9 +88,7 @@ def gen_cleanlc(outdir, year):
     # update profile
     out_profile = target_layers[1][3]
     out_profile.update({
-        'dtype': rasterio.uint8,
-        # 'dtype': rasterio.int32,
-        'nodata': 0,
+        'dtype': rasterio.float32,
         'count': lc_stack.shape[0],
         'height': target_layers[0][0].shape[1],
         'width': target_layers[0][0].shape[2],
@@ -112,12 +110,12 @@ if __name__ == '__main__':
     makedir(outdir)
 
     # lc data
-    lcdir = os.path.join(preddir,'prediction_hmm')
+    lcdir = os.path.join(preddir,'gee')
     lc_list = glob.glob(os.path.join(lcdir, '*.tif'))
     lc_list.sort(key=lambda f: int(re.sub('\D', '', f)))
 
     # aux files
-    aoi_file = os.path.join(auxdir,'aoi','aoi_bigger.shp')
+    aoi_file = os.path.join(auxdir,'aoi','amazon_raisg.shp')
     terrai_file = os.path.join(auxdir,'terrai','AMZ_decrease_2004_01_01_to_2019_06_10_new.tif')
     watermask_file = os.path.join(auxdir,'watermask','watermask_new.tif')
 
