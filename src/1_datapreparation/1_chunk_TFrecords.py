@@ -651,7 +651,7 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
             labels_ = [retrans(labels_chunk_data[i], 'label') for i in good_indices]
             labelsfrac_ = [retrans(labelsfrac_chunk_data[i], 'label') for i in good_indices]
 
-        elif exportblocks == "train_forest70" or exportblocks == "eval" or exportblocks == "crossyear" or exportblocks == "pred":
+        elif exportblocks == "train_forest70" or exportblocks == "eval" or exportblocks == "crossyear" or exportblocks == "pred" or exportblocks == "transfer":
 
             x250_ = [retrans(x250_chunk_data[i], 'x') for i in all_blocks]
             x250aux_ = [retrans(x250aux_chunk_data[i], 'x') for i in all_blocks]
@@ -666,7 +666,7 @@ def parser_fn(predict_files, directory, class_path, n_patches, maxblocks, export
 
             parser.write(outdir_file, x250_[t], x250aux_[t], x500_[t], DOY, year, labels_[t], labelsfrac_[t])
 
-            if exportblocks != "pred":
+            if not exportblocks in ["pred","transfer"]:
                 # export class
                 labels = labels_[t].astype(np.int64)
 
@@ -708,7 +708,7 @@ if __name__ == '__main__':
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    if exportblocks != "pred":
+    if not exportblocks in [ "pred", "transfer" ]:
         class_path = os.path.join(rootdir,'gz',str(int(psize / maxblocks)), dataset,'classes','data' + tyear[2:])
         if not os.path.exists(class_path):
             os.makedirs(class_path)
@@ -747,14 +747,15 @@ if __name__ == '__main__':
     if nworkers is not None and nworkers > 1:
 
         if exportblocks == 'train' or exportblocks == 'train_forest70':
-            target_tiles = gpd.read_file(os.path.join(rootdir, 'geodata', 'blocks', str(psize), 'geojson', 'fileid.geojson'))
-
             train_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','train_fold0.tileids')),
                 dtype='str').tolist()
             test_tiles = np.loadtxt(
                 os.path.join(os.path.join(rootdir,'geodata','split',str(psize),'final','tileids','test_fold0.tileids')),
                 dtype='str').tolist()
+
+            if not isinstance(test_tiles, list):
+                test_tiles = [str(test_tiles)]
 
             target_tiles = train_tiles + test_tiles
 
@@ -774,6 +775,9 @@ if __name__ == '__main__':
                 dtype='str').tolist()
 
             target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
+
+        elif exportblocks == "transfer":
+            target_tiles = os.path.basename(tiles).split('-')[0] + '-0.gz'
 
         print('Using joblib.Parallel with nworkers=%d' % nworkers)
         print('Number of tiles subset for the AOI: %d' % len(target_tiles))
@@ -818,6 +822,11 @@ if __name__ == '__main__':
             target_tiles = target_tiles
 
             target_tiles = set([os.path.basename(tiles[0]).split('-')[0] + '-' + i.split('_')[-1] + '.gz' for i in target_tiles])
+
+        elif exportblocks == "transfer":
+            target_tiles = os.path.basename(tiles[0])
+            if not isinstance(target_tiles, list):
+                target_tiles = [target_tiles]
 
         for tile in target_tiles:
 

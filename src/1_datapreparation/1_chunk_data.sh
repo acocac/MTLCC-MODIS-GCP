@@ -1,10 +1,10 @@
 #!/bin/bash
 
-YEARS=(2005 2006)
-PROJECTS=(AMZ)
+YEARS=(2001)
+PROJECTS=(tl_africa)
 psize=(384)
 maxblocks=(1)
-partition=(pred) #train_forest70 eval crossyear
+partition=(transfer) #train_forest70 eval crossyear
 
 mkdir -p "F:/acoca/research/gee/dataset/$project/_logs"
 
@@ -12,6 +12,8 @@ if [ "$partition" = 'train_forest70' ] || [ "$partition" = "train" ];  then
     nworkers=(12)
 elif [ "$partition" = 'eval' ] || [ "$partition" = "crossyear" ] || [ "$partition" = "pred" ];  then
     nworkers=(12)
+elif [ "$partition" = 'transfer' ];  then
+    nworkers=(0)
 fi
 
 for project in ${PROJECTS[@]}; do

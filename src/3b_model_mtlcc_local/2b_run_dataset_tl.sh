@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MODELS=(bands)
-project=(tl_bogota)
+project=(tl_africa)
 epochs=30
 psize=(24)
 cell=(128)

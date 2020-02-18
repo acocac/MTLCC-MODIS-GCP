@@ -10,7 +10,7 @@ import threading
 
 #os.environ["GDAL_DATA"] = os.environ["HOME"] + "/.conda/envs/MTLCC/share/gdal"
 
-EVAL_IDS_IDENTIFIER = "eval"
+EVAL_IDS_IDENTIFIER = "viz"
 
 MODEL_CFG_FILENAME = "params.ini"
 

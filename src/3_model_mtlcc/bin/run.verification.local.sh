@@ -24,7 +24,7 @@
 
 YEARS=(2001)
 input=(bands)
-REFERENCES=(MCD12Q1v6stable01to03_LCProp2_major)
+REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)
 PROJECTS=(AMZ)
 
 for reference in ${REFERENCES[@]}; do

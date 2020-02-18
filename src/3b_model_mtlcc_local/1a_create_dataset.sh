@@ -3,10 +3,10 @@
 
 MODELS=(bands)
 year=(010203)
-project=(AMZ)
+project=(tl_bogota)
 psize=(24)
 cell=(128)
-experiment=(4_local)
+experiment=(5_scratch)
 batchsize=24
 SPLITS=(0)
 REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)

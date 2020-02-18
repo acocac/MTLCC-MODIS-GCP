@@ -1,11 +1,11 @@
 
 #!/bin/bash
 
-YEARS=(2019)
-PROJECTS=(AMZ)
+YEARS=(2001 2002 2003)
+PROJECTS=(tl_bogota)
 psize=(384)
-RESOLUTIONS=(250m_aux) #250m_spectral 250m_aux 500m_spectral
-storage=(GCloud)
+RESOLUTIONS=(250m_spectral 250m_aux 500m_spectral) #250m_spectral 250m_aux 500m_spectral
+storage=(Gdrive)
 bucket=('thesis-2020')
 
 for project in ${PROJECTS[@]}; do

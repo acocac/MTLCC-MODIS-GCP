@@ -82,8 +82,8 @@ def gen_cleanlc(outdir, year):
     # arrange stack
     lc_stack = np.ma.stack(lc_layers_target, axis=0)
     lc_stack = lc_stack.reshape((lc_stack.shape[0] * lc_stack.shape[1], lc_stack.shape[2], lc_stack.shape[3]))
-    # lc_stack = lc_stack.filled(np.nan)
-    lc_stack = lc_stack.filled(0)
+    lc_stack = lc_stack.filled(np.nan)
+    # lc_stack = lc_stack.filled(0)
 
     # update profile
     out_profile = target_layers[1][3]
@@ -112,7 +112,6 @@ if __name__ == '__main__':
     # lc data
     lcdir = os.path.join(preddir,'gee')
     lc_list = glob.glob(os.path.join(lcdir, '*.tif'))
-    lc_list.sort(key=lambda f: int(re.sub('\D', '', f)))
 
     # aux files
     aoi_file = os.path.join(auxdir,'aoi','amazon_raisg.shp')

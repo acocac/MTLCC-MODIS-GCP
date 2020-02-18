@@ -255,6 +255,7 @@ if __name__ == '__main__':
 
     tfiles_250m_aux = (n_patches_first * (len(fileNames_250m_aux)-1)) + n_patches_last
 
+    print(tfiles_250m_spectral, tfiles_500m_spectral, tfiles_250m_aux)
     assert(tfiles_250m_spectral == tfiles_500m_spectral == tfiles_250m_aux)
 
     bands_250m_spectral = ['red', 'NIR']

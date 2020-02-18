@@ -24,6 +24,7 @@ MODEL_CHECKPOINT_NAME = "model.ckpt"
 
 PREDICTION_FOLDERNAME="prediction"
 CONFIDENCES_FOLDERNAME="confidences"
+GROUND_TRUTH_FOLDERNAME="ground_truth"
 
 TRUE_PRED_FILENAME="truepred.npy"
 
@@ -83,6 +84,7 @@ def eval(args):
     samples_seen_op = get_operation("samples_seen")
     predictions_scores_op = get_operation("prediction_scores")
     predictions_op = get_operation("predictions")
+    labels_op = get_operation("targets")
 
     saver = tf.train.Saver(save_relative_paths=True)
 
@@ -117,6 +119,7 @@ def eval(args):
             if not os.path.exists(outfolder):
                 os.makedirs(outfolder)
 
+        print('wt')
         makedir(join(args.storedir, PREDICTION_FOLDERNAME))
 
         try:
@@ -140,11 +143,12 @@ def eval(args):
                 #print "{} evaluation step {}...".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), step)
                 feed_dict = {iterator_handle_op: data_handle, is_train_op: False}
 
-                for p in range(2):
-                    pred, pred_sc = sess.run([predictions_op, predictions_scores_op], feed_dict=feed_dict)
+                for p in range(args.npatches):
+                    pred, pred_sc, label = sess.run([predictions_op, predictions_scores_op, labels_op], feed_dict=feed_dict)
 
                     # add one since the 0 (unknown dimension is used for mask)
                     pred = sess.run(dataset.inverse_id_lookup_table.lookup(tf.constant(pred + 1, dtype=tf.int64)))
+                    # label = sess.run(dataset.inverse_id_lookup_table.lookup(tf.constant(label, dtype=tf.int64)))
 
                     if args.writetiles:
 
@@ -159,6 +163,12 @@ def eval(args):
                                 srid = dataset.srids[tileid]
 
                                 threadlist.append(write_tile(pred[tile], tileid, join(args.storedir,PREDICTION_FOLDERNAME), geotransform, srid, 'prediction'))
+
+                                if args.writegt:
+                                    makedir(join(args.storedir, GROUND_TRUTH_FOLDERNAME))
+                                    threadlist.append(
+                                        write_tile(label[tile], tileid, join(args.storedir, GROUND_TRUTH_FOLDERNAME),
+                                                   geotransform, srid, 'gt'))
 
                                 if args.writeconfidences:
                                     for cl in range(pred_sc.shape[-1]):
@@ -213,7 +223,7 @@ def write_tile_(array, datafilename, outfolder, geotransform, srid, target):
         gdaldtype = gdal.GDT_Float32
 
     # create the 3-band raster file
-    if target == 'prediction':
+    if target == 'prediction' or target == 'gt':
         dst_ds = gdal.GetDriverByName('GTiff').Create(outpath, ny, nx, 1, gdaldtype, options = ['COMPRESS=LZW'])
     elif target == 'confidences':
         dst_ds = gdal.GetDriverByName('GTiff').Create(outpath, ny, nx, 1, gdaldtype)
@@ -253,6 +263,7 @@ if __name__ == "__main__":
     parser.add_argument('-exp', '--experiment', type=str, default="None")
     parser.add_argument('-ref','--reference', type=str, default="MCD12Q1v6raw_LCType1", help='Reference dataset to train')
     parser.add_argument('-step','--step', type=str, default="evaluation", help='step')
+    parser.add_argument('-npatches','--npatches', type=int, default=2, help='Number of patches per combined TFRecord file')
 
     args = parser.parse_args()
 

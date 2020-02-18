@@ -14,6 +14,7 @@ acocac@gmail.com
 
 import ee
 import argparse
+import os
 
 ee.Initialize()
 
@@ -234,6 +235,9 @@ if __name__ == '__main__':
         _, patch_id, file_id = outdir.split("_")
         aoi = tiles.filter(ee.Filter.And(ee.Filter.eq("file_id", int(file_id)), ee.Filter.eq("patch_id", int(patch_id))))
         sizeGEE = 1000000000
+    elif outdir.startswith("tl_"):
+        aoi = ee.FeatureCollection('users/acocacbasic/thesis/tl/' + outdir)
+        sizeGEE = 1000000000
     else:
         aoi = ee.FeatureCollection('users/acocacbasic/test_aois/tile_1_612')
         sizeGEE = 1000000000
@@ -453,7 +457,7 @@ if __name__ == '__main__':
     if storage == 'Gdrive':
         task = ee.batch.Export.image.toDrive(image=ni,
                                              description= '{}_p{}k{}_{}'.format(outdir, psize, ksize, res),
-                                             folder=outdir,
+                                             folder='{}-{}'.format(outdir, tyear),
                                              region=aoi.geometry().bounds().getInfo()["coordinates"],
                                              scale=scale,
                                              crs = proj,
@@ -461,7 +465,7 @@ if __name__ == '__main__':
                                              maxPixels=1e9,
                                              formatOptions = {
                                                  'patchDimensions': [psize, psize],
-                                                 'tensorDepths': depth.getInfo(),
+                                                 'tensorDepths': depth,
                                                  'collapseBands': False,
                                                  'compressed': True,
                                                  'maxFileSize': 1000000000

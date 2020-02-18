@@ -34,6 +34,13 @@ def parfiles(indir, f):
     traintiles = np.loadtxt(os.path.join(indir, 'train_fold{}.tileids'.format(f)), dtype='str')
     testtiles = np.loadtxt(os.path.join(indir, 'test_fold{}.tileids'.format(f)), dtype='str')
     evaltiles = np.loadtxt(os.path.join(indir, 'eval.tileids'), dtype='str')
+
+    if not isinstance(testtiles, list):
+        testtiles = [str(testtiles)]
+
+    if not isinstance(evaltiles, list):
+        evaltiles = [str(evaltiles)]
+
     return(traintiles, testtiles, evaltiles)
 
 if __name__ == '__main__':
@@ -50,7 +57,7 @@ if __name__ == '__main__':
     train, test, eval = parfiles(tileiddir, fold)
 
     #load merge patch and fileid geojson
-    df_all = gpd.read_file(os.path.join(rootdir, 'geodata','split', str(psize), 'raw', 'tileid','tileid.geojson'))
+    # df_all = gpd.read_file(os.path.join(rootdir, 'geodata','split', str(psize), 'raw', 'tileid','tileid.geojson'))
 
     #project dir
     projectdir = os.path.join(rootdir, 'gz', str(int(psize / blocks)), 'multiple')

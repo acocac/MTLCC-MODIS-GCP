@@ -1,19 +1,19 @@
 #!/bin/bash
 
-project=(AMZ)
-experiment=(4_local)
+project=(tl_bogota)
+experiment=(0_tl)
 MODELS=(convgru)
 REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)
 ssize=3000
 trials=25
 TRAIN_YEAR='200120022003'
 YEARS=(2001 2002 2003)
-level=(perclass)
+level=(global)
 #folds=(0)
-bestmodels=(5)
+bestmodels=(012)
 
-rootdir="E:/acocac/research/${project}/eval/metrics/$experiment"
-logdir="E:/acocac/research/${project}/eval/metrics/$experiment/_logs/"
+rootdir="F:/acoca/research/gee/dataset/${project}/eval/metrics/$experiment"
+logdir="F:/acoca/research/gee/dataset/${project}/eval/metrics/$experiment/_logs/"
 
 for reference in ${REFERENCES[@]}; do
 

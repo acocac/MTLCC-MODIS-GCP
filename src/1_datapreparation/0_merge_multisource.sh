@@ -1,8 +1,8 @@
 #!/bin/bash
 
-YEARS=(2001)
-PROJECTS=(AMZpred)
-psize=(1152)
+YEARS=(2001 2002 2003)
+PROJECTS=(tl_bogota)
+psize=(384)
 
 for project in ${PROJECTS[@]}; do
     mkdir -p "F:/acoca/research/gee/dataset/${project}/_logs"

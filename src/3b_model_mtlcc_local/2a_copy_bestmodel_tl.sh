@@ -4,12 +4,13 @@
 MODELS=(bands)
 year=(010203)
 epochs=(ep30)
-project=(tl_bogota)
+project_major=(AMZ)
+project_minor=(tl_bogota)
 psize_train=(24)
-psize_eval=(384)
+psize_target=(24)
 cell=(128)
-experiment=(5_scratch)
-ckp=(3843)
+experiment=(4_local)
+ckp=(169921)
 batchsize=24
 SPLITS=(0)
 REFERENCES=(MCD12Q1v6stable01to15_LCProp2_major)
@@ -67,11 +68,11 @@ for reference in ${REFERENCES[@]}; do
             echo "Processing year: $year and model: $model and split: $split and reference: $reference"
 
             python modelzoo/seqencmodel.py \
-                --modelfolder "E:/acocac/research/${project}/eval/models/$experiment/${epochs}/convgru${cell}_p${psize_eval}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_${model}_fold${split}_ckp${ckp}" \
+                --modelfolder "E:/acocac/research/${project_minor}/models/$experiment/${model}/convgru${cell}_p${psize_target}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" \
                         --num_classes $num_classes \
                         --num_bands_250m $bands250m \
                         --num_bands_500m $bands500m \
-                        --pix250m $psize_eval \
+                        --pix250m $psize_target \
                         --convrnn_filters=$cell \
                         --convcell gru \
                         --optimizertype $optimizertype \
@@ -79,13 +80,15 @@ for reference in ${REFERENCES[@]}; do
                         --convrnn_layers 1 \
                         --bidirectional TRUE
 
-            python init_graph.py "E:/acocac/research/${project}/eval/models/$experiment/${epochs}/convgru${cell}_p${psize_eval}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_${model}_fold${split}_ckp${ckp}/graph.meta"
+            python init_graph.py "E:/acocac/research/${project_minor}/models/$experiment/${model}/convgru${cell}_p${psize_target}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}/graph.meta"
 
             if [ "$ckp" = "last" ]; then
-                python copy_network_weights.py "E:/acocac/research/${project}/models/$experiment/${epochs}/${model}/convgru${cell}_p${psize_train}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" "E:/acocac/research/${project}/eval/models/$experiment/${epochs}/convgru${cell}_p${psize_eval}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_${model}_fold${split}_ckp${ckp}"
+                python copy_network_weights.py "E:/acocac/research/${project_major}/models/$experiment/${epochs}/${model}/convgru${cell}_p${psize_train}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" "E:/acocac/research/${project_minor}/models/$experiment/${model}/convgru${cell}_p${psize_target}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" \
+                --reset
             else
-                python copy_network_weights.py "E:/acocac/research/${project}/models/$experiment/${epochs}/${model}/convgru${cell}_p${psize_train}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" "E:/acocac/research/${project}/eval/models/$experiment/${epochs}/convgru${cell}_p${psize_eval}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_${model}_fold${split}_ckp${ckp}" \
-                    --sourcecheckpoint "model.ckpt-${ckp}"
+                python copy_network_weights.py "E:/acocac/research/${project_major}/models/$experiment/${epochs}/${model}/convgru${cell}_p${psize_train}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" "E:/acocac/research/${project_minor}/models/$experiment/${model}/convgru${cell}_p${psize_target}pxk0px_batch${batchsize}_${year}_${optimizertype}_${reference}_8d_l1_bidir_fold${split}" \
+                    --sourcecheckpoint "model.ckpt-${ckp}" \
+                    --reset
             fi
         done
     done

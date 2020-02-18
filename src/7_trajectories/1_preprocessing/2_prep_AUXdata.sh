@@ -8,10 +8,10 @@ logdir="F:/acoca/research/gee/dataset/${project}/trajectories/_logs/"
 mkdir -p $logdir
 
 echo "Creating AUX data for year(s): $years"
-logfname="${logdir}/aux2.log"
+logfname="${logdir}/auxdata.log"
 
 python 2_prepare_AUX_byyear.py \
-        --preddir="F:/acoca/research/gee/dataset/${project}/implementation/ep30/ancillary" \
+        --preddir="F:/acoca/research/gee/dataset/${project}/implementation/ancillary" \
         --auxdir="F:/acoca/research/gee/dataset/${project}/implementation" \
         --outdir="F:/acoca/research/gee/dataset/${project}/trajectories/ep30/aux" \
         --targetyear $years \

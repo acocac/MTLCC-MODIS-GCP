@@ -1000,7 +1000,7 @@ class Dataset():
             # e.g. test240_fold0.tileids
             path = os.path.join(self.tileidfolder, traintest.format(partition=partition, fold=fold))
             return readids(path)
-        elif partition == 'eval' or partition == 'pred':
+        elif partition == 'eval' or partition == 'pred' or partition == 'viz':
             # e.g. eval240.tileids
             path = os.path.join(self.tileidfolder, eval.format(partition=partition))
             return readids(path)
@@ -1060,7 +1060,7 @@ class Dataset():
 
             feature = self.tilestatic(feature)
 
-            if self.step == "training" or self.step == "evaluation":
+            if self.step == "training" or self.step == "evaluation" or self.step == "verification":
                 if self.reference == "MCD12Q1v6raw_LCType1": feature = self.MCD12Q1v6raw_LCType1(feature)
                 if self.reference == "MCD12Q1v6raw_LCProp1": feature = self.MCD12Q1v6raw_LCProp1(feature)
                 if self.reference == "MCD12Q1v6raw_LCProp2": feature = self.MCD12Q1v6raw_LCProp2(feature)
