@@ -39,7 +39,7 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
   global_colors = c('#f9ffa4', 
                     '#1c0dff', '#fa0000', 
                     '#003f00', '#006c00', 
-                    '#f096ff', 
+                    '#db00ff', 
                     '#dcd159') 
   
   yearls <- paste0(as.character(seq(lc_target_years[1],lc_target_years[2],1)))
@@ -155,9 +155,9 @@ split_seq <- function(dataset, results_df, ratio, quantile, plot=FALSE){
       par(mar = c(1, 1, 1, 1), las=2, cex.main = 2.5,  mai = c(1, 0.6, 0.8, 0.6))
       seqdplot(tab.seq.s, with.legend = F, border = NA,main="LC distribution per year (fraction [0-1])", ylab="", legend.prop=0.2, cex.axis=2.4)
       abline(v = pos_year, col="black", lwd=3, lty=2)
-      seqfplot(tab.stable.seq, idxs=1:nrow(tab.stable.seq), with.legend = F, border = NA, main="Stable LC sequences \n (All)", legend.prop=0.2, cex.axis=2.4, cex.lab=1.9)
+      seqfplot(tab.stable.seq, idxs=1:nrow(tab.stable.seq), with.legend = F, border = NA, main="Stable LC sequences \n (All)", legend.prop=0.2, cex.axis=2.4, cex.lab=2.4)
       abline(v = pos_year, col="black", lwd=3, lty=2)
-      seqfplot(tab.nonstable.seq, idxs=1:seqfreqidx(tab.nonstable.seq, quantile), with.legend = F, border = NA, main=paste0("Non-stable LC sequences \n (",as.character(round(quantile*100)),"% quantile)"), legend.prop=0.2, cex.axis=2.4, cex.lab=1.9)
+      seqfplot(tab.nonstable.seq, idxs=1:seqfreqidx(tab.nonstable.seq, quantile), with.legend = F, border = NA, main=paste0("Non-stable LC sequences \n (",as.character(round(quantile*100)),"% quantile)"), legend.prop=0.2, cex.axis=2.4, cex.lab=2.4)
       abline(v = pos_year, col="black", lwd=3, lty=2)
       dev.off()
     }
@@ -218,11 +218,9 @@ tile <- 'AMZ'
 
 #dirs
 indir <- paste0("E:/acocac/research/",tile,"/trajectories/data")
-chart_dir <- paste0("E:/acocac/research/",tile,"/trajectoriesep/charts")
-dir.create(chart_dir, showWarnings = FALSE, recursive = T)
 
 ##analysis with simple classes
-targetyears = c(2004:2006)
+targetyears = c(2001:2018)
 lc_target_years <-c(2001,2019)
 
 for (j in targetyears){

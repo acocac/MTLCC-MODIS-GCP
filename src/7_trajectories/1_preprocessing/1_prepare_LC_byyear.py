@@ -117,7 +117,7 @@ if __name__ == '__main__':
     lc_list.sort(key=lambda f: int(re.sub('\D', '', f)))
 
     # aux files
-    aoi_file = os.path.join(auxdir,'aoi','amazon_raisg.shp')
+    aoi_file = os.path.join(auxdir,'aoi','amazon_raisg_humidforest.shp')
     terrai_file = os.path.join(auxdir,'terrai','AMZ_decrease_2004_01_01_to_2019_06_10_new.tif')
     watermask_file = os.path.join(auxdir,'watermask','watermask_new.tif')
 

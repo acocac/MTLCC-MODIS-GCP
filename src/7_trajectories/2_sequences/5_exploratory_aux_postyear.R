@@ -24,7 +24,7 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
   global_colors = c('#f9ffa4', 
                     '#1c0dff', '#fa0000', 
                     '#003f00', '#006c00', 
-                    '#f096ff', 
+                    '#db00ff', 
                     '#dcd159') 
   
   global_features <- c(1,
@@ -65,24 +65,41 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
   dem_val =raster::extract(dem, mypoints)
   slope_val =raster::extract(slope, mypoints)
   access_val =raster::extract(access, mypoints)
+  prec_val =raster::extract(precipitation, mypoints)
+  pascon_val =raster::extract(pas_conservation, mypoints)
+  pasexp_val =raster::extract(pas_exploitation, mypoints)
   
+  tab.target_geo$access = (access_val)/(60*24)
   tab.target_geo$dem = dem_val
   tab.target_geo$slope = slope_val
-  tab.target_geo$access = access_val
+  tab.target_geo$prec = prec_val
+  tab.target_geo$pascon = (pascon_val * 231.91560544825498) / 1000
+  tab.target_geo$pasexp = (pasexp_val * 231.91560544825498) / 1000
+  
+  tab.target_geo_unique = tab.target_geo
   
   ## Create categorical data from covariates
   ## Two categories for distance and slope (binary variable)
-  tab.target_geo$accessK2<-cut(tab.target_geo$access, c(0,500,max(tab.target_geo$access, na.rm = TRUE)))
+  tab.target_geo$accessK2<-cut(tab.target_geo$access, c(0,0.5,max(tab.target_geo$access, na.rm = TRUE)))
   tab.target_geo$slopeK2<-cut(tab.target_geo$slope, c(-1,6,max(tab.target_geo$slope, na.rm = TRUE)))
   tab.target_geo$demK2<-cut(tab.target_geo$dem, c(0,250,max(tab.target_geo$dem, na.rm = TRUE)))
+  tab.target_geo$precK2<-cut(tab.target_geo$prec, c(0,2000,max(tab.target_geo$prec, na.rm = TRUE)))
+  tab.target_geo$pasconK2<-cut(tab.target_geo$pascon, c(0,50,max(tab.target_geo$pascon, na.rm = TRUE)))
+  tab.target_geo$pasexpK2<-cut(tab.target_geo$pasexp, c(0,50,max(tab.target_geo$pasexp, na.rm = TRUE)))
   
   # Compute and test the share of discrepancy explained by different categories on covariates 
-  da1 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$slopeK2, R = 50, weight.permutation="diss")
+  da1 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$accessK2, R = 50, weight.permutation="diss")
   print(da1$stat)
   da2 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$demK2, R = 50, weight.permutation="diss")
   print(da2$stat)
-  da3 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$accessK2, R = 50, weight.permutation="diss")
+  da3 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$slopeK2, R = 50, weight.permutation="diss")
   print(da3$stat)
+  da4 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$precK2, R = 50, weight.permutation="diss")
+  print(da4$stat)
+  da5 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$pasconK2, R = 50, weight.permutation="diss")
+  print(da5$stat)
+  da6 <- dissassoc(seq_dist, weights=seq_weights,group = tab.target_geo$pasexpK2, R = 50, weight.permutation="diss")
+  print(da6$stat)
   
   #relate
   ##add and prepare aux columns
@@ -93,16 +110,26 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
   dem_val =raster::extract(dem, mypoints)
   slope_val =raster::extract(slope, mypoints)
   access_val =raster::extract(access, mypoints)
+  prec_val =raster::extract(precipitation, mypoints)
+  pascon_val =raster::extract(pas_conservation, mypoints)
+  pasexp_val =raster::extract(pas_exploitation, mypoints)
   
+  tab.target_geo$access = (access_val)/(60*24)
   tab.target_geo$dem = dem_val
   tab.target_geo$slope = slope_val
-  tab.target_geo$access = access_val
+  tab.target_geo$prec = prec_val
+  tab.target_geo$pascon = (pascon_val * 231.91560544825498) / 1000
+  tab.target_geo$pasexp = (pasexp_val * 231.91560544825498) / 1000
+  
+  tab.target_geo_target = tab.target_geo
   
   ## Create categorical data from covariates
-  ## Two categories for distance and slope (binary variable)
-  tab.target_geo$accessK2<-cut(tab.target_geo$access, c(0,500,max(tab.target_geo$access, na.rm = TRUE)))
+  tab.target_geo$accessK2<-cut(tab.target_geo$access, c(0,0.5,max(tab.target_geo$access, na.rm = TRUE)))
   tab.target_geo$slopeK2<-cut(tab.target_geo$slope, c(-1,6,max(tab.target_geo$slope, na.rm = TRUE)))
   tab.target_geo$demK2<-cut(tab.target_geo$dem, c(0,250,max(tab.target_geo$dem, na.rm = TRUE)))
+  tab.target_geo$precK2<-cut(tab.target_geo$prec, c(0,2000,max(tab.target_geo$prec, na.rm = TRUE)))
+  tab.target_geo$pasconK2<-cut(tab.target_geo$pascon, c(0,50,max(tab.target_geo$pascon, na.rm = TRUE)))
+  tab.target_geo$pasexpK2<-cut(tab.target_geo$pasexp, c(0,50,max(tab.target_geo$pasexp, na.rm = TRUE)))
   
   # Compute and t
   tabe.seq <- seqecreate(seq_object_all, use.labels = FALSE)
@@ -110,6 +137,9 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
   lc_tab <- tab.target_geo[lc,]
   
   lc_tab_df = as.data.frame(lc_tab)
+  
+  print(paste0('Dimensions ori data: ', dim(tab.target_geo)[1]))
+  print(paste0('Dimensions new data: ', dim(lc_tab_df)[1]))
   
   classes <- c()
   for (year in start_idx:(length(yearls)+2)){
@@ -130,10 +160,8 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
   fsubseq <- seqefsub(lc.seqe, pmin.support = 0.05)
   # 10 Most common subsequences
   
-  plot(fsubseq[1:10], col = "grey98")
-  
-  aux_vars<- c('demK2','slopeK2','accessK2','clusters')
-  aux_names <- c('Elevation','Slope','Accessibility','Clusters')
+  aux_vars<- c('accessK2','demK2','slopeK2','precK2','pasconK2','pasexpK2','clusters')
+  aux_names <- c('Accessibility','Elevation','Slope','Precipitation','Proximity to conservation PAs','Proximity to exploitation PAs','Clusters')
   
   for (i in 1:length(aux_vars)){
     tcolumn <-which(names(lc_tab_df) == aux_vars[i])
@@ -156,7 +184,11 @@ explanatory_aux <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", 
     dev.off()
     
   }
-
+  
+  ##write all db
+  file_path <- paste0(explanatory_dir,'/db_',cluster_method,"_clustersk",as.character(n_cluster),"_",seq_dist_name)
+  outputs = list('clusterall_aux'=tab.target_geo_target,'clustersample_aux'=tab.target_geo_unique,'seq_DF'=lc.seq)
+  rlist::list.save(outputs, paste0(file_path,'.rdata'))
 
 }
 
@@ -188,12 +220,15 @@ dir.create(explanatory_dir, showWarnings = FALSE, recursive = T)
 aux_dir <- "F:/acoca/research/gee/dataset/AMZ/implementation"
 proj <- CRS('+proj=longlat +ellps=WGS84')
 
-dem <- raster(paste0(aux_dir,'/ancillary/gee/srtm.tif'))
-slope <- raster(paste0(aux_dir,'/ancillary/gee/slope.tif'))
-access <- raster(paste0(aux_dir,'/ancillary/gee/access.tif'))
+access <- raster(paste0(aux_dir,'/ancillary/processed/access.tif'))
+dem <- raster(paste0(aux_dir,'/ancillary/processed/srtm.tif'))
+slope <- raster(paste0(aux_dir,'/ancillary/processed/slope.tif'))
+precipitation <- raster(paste0(aux_dir,'/ancillary/processed/bio12.tif'))
+pas_conservation <- raster(paste0(aux_dir,'/ancillary/processed/distance_PAs_conservation_AMZ.tif'))
+pas_exploitation <- raster(paste0(aux_dir,'/ancillary/processed/distance_PAs_exploitation_AMZ.tif'))
 
 ##start###
-targetyears = c(2005:2018)
+targetyears = c(2007:2007)
 
 cluster_method="WARD"
 sub_cost_method = "TRATE"

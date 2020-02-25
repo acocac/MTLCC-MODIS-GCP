@@ -81,8 +81,10 @@ evaluate_cluster_stats_medoids <- function(seq_dist,seq_wts,k_range){
 }
 
 evaluate_cluster_stats_hclust <- function(seq_dist,k_range,seq_weights){
-  averageClust <- hclust(as.dist(seq_dist), method = "average", members=seq_weights)
-  avgClustQual <- as.clustrange(averageClust, diss=seq_dist, weights=seq_weights,  ncluster = max(k_range))
+  averageClust <- hclust(as.dist(seq_dist), method = "ward.D", members=seq_weights)
+  #avgClustQual <- as.clustrange(averageClust, diss=seq_dist, weights=seq_weights,  ncluster = max(k_range))
+  avgClustQual <- wcKMedRange(seq_dist,weights=seq_weights,kvals = min(k_range):max(k_range), initialclust = averageClust)
+  
   return(avgClustQual)
 }
 
@@ -94,153 +96,6 @@ save_sequence_distances <- function(seq_dist,seq_dist_path){
   # model_name: name of the file
   
   save(seq_dist, file=paste0(seq_dist_path,".RSav"))
-}
-
-find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", seq_dist_method="LCS", bcluster="medoids", k_range){
-# find_optimal_clusters <- function(tyear, lc_target_years, distances_dir){
-    
-  ##analysis
-  infile <- paste0(indir,'/','resultsseq_tyear_',as.character(tyear),'_simple.rdata')
-  
-  results_df = rlist::list.load(infile)
-  
-  tab = results_df[4][[1]]
-  tyear = results_df[3][[1]]
-  
-  yearls <- paste0(as.character(seq(lc_target_years[1],lc_target_years[2],1)))
-  
-  ##determine start year
-  start_idx <- 2 + (which(yearls == tyear)-2)
-  
-  global_classes <- c('Barren',
-                      'Water Bodies',
-                      'Urban and Built-up Lands',
-                      'Dense Forests',
-                      'Open Forests',
-                      'Farmland',
-                      'Shrublands')
-  
-  global_shortclasses <- c('Ba', 
-                           'W', 'Bu',
-                           'DF', 'OF', 
-                           'Fm',
-                           'S')
-  global_colors = c('#f9ffa4', 
-                    '#1c0dff', '#fa0000', 
-                    '#003f00', '#006c00', 
-                    '#db00ff', 
-                    '#dcd159') 
-  
-  global_features <- c(1,
-                      1,1,
-                      10,5,
-                      3,
-                      5)
-  
-  classes <- c()
-  for (year in start_idx:(length(yearls)+2)){
-    classes <- unique(c(classes,tab[,year]))
-  }
-  
-  target_classes <- global_classes[sort(classes)]
-  target_short <- global_shortclasses[sort(classes)]
-  target_colors <- global_colors[sort(classes)]
-  
-  alphabet <- sort(classes)
-  
-  tab.seq <- seqdef(tab, start_idx:(length(yearls)+2), alphabet = alphabet, states = target_short,
-                    cpal = target_colors, labels = target_short, with.missing = TRUE)
-  
-  
-  #create stratas
-  std.df <- apply(tab[,start_idx:(dim(tab)[2]-1)], 1, sd) 
-  
-  tab.stable = tab[std.df==0,]
-  tab.nonstable = tab[std.df!=0,]
-  
-  tab.target = tab.nonstable
-  
-  seq_object_all <- seqdef(tab.target, start_idx:(length(yearls)+2), alphabet = alphabet, states = target_short,
-                              cpal = target_colors, labels = target_short)
-  
-  ## save seq all
-  file_name <- paste0(tyear,'_target_seq')
-  file_path <- paste0(seqdata_dir,'/',file_name)
-
-  if(!file.exists(paste0(file_path,".RSav"))){
-    save(seq_object_all, file=paste0(file_path,".RSav"))
-  }
-  
-  ## save target matrix
-  file_name <- paste0(tyear,'_target_tb')
-  file_path <- paste0(seqdata_dir,'/',file_name)
-  if(!file.exists(paste0(file_path,".RSav"))){
-    save(tab.target, file=paste0(file_path,".RSav"))
-  }
-  
-  seq_obj <- create_sequence_object(tab.target, tyear, start_idx, yearls, alphabet, target_short, target_colors)
-  seq_weights <- attr(seq_obj,"weights")
-  
-  ## Load distance matrix
-  file_name <- paste0(tyear,'_',sub_cost_method,'_',seq_dist_method)
-  file_path <- paste0(seqdist_dir,'/',file_name)
-
-  if(!file.exists(paste0(file_path,".RSav"))){
-    ## Create substitution cost matrix
-    if (sub_cost_method == "TRATE"){
-      seq_subcost <- seqcost(seq_obj, method = "TRATE",with.missing = FALSE)
-      seq_dist <- seqdist(seq_obj, method = "OM",indel = seq_subcost$indel, sm = seq_subcost$sm,with.missing = F)
-    } else if(sub_cost_method == "FEATURES"){
-      target_classes <- global_features[sort(classes)]
-      print(target_classes)
-      tab_state_features <- data.frame(state=target_classes)
-      
-      seq_subcost <- seqcost(seq_obj, method = "FEATURES",with.missing = FALSE, state.features = tab_state_features)
-      seq_dist <- seqdist(seq_obj, method = "OM",indel = seq_subcost$indel, sm = seq_subcost$sm,with.missing = F)
-    } else{
-      seq_subcost <- create_substitution_cost(seq_obj,method=sub_cost_method,cval=2)
-      seq_dist <- compute_sequence_distances(seq_obj,seq_subcost,method=seq_dist_method)
-    }
-    ## Save distance matrix
-    save_sequence_distances(seq_dist,file_path)
-  }else{
-    print("Loading seq dist file")
-    load(file=paste0(file_path,".RSav"))
-  }
-
-  if (bcluster == 'medoids'){
-    cluster_stats <- evaluate_cluster_stats_medoids(seq_dist,seq_weights,k_range)
-    df_statstics <- cluster_stats$stats
-    clus_stats_name <- paste0("medoid_cluster_stats_",tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range))
-    write.csv(df_statstics,file=paste0(clusters_dir,"/",clus_stats_name,".csv"))
-
-    png(file=paste0(clusters_dir,'/medoid_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_wcKM_ASW_CH.png'), width = 560, height = 474, res = 99)
-    par(mfrow=c(1:2))
-    plot(x=k_range,y=df_statstics$ASW,type='l',col=2,main="ASW")
-    plot(x=k_range,y=df_statstics$CH,type='l',col=2,main="CH")
-    dev.off()
-    
-  } else{
-    cluster_stats <- evaluate_cluster_stats_hclust(seq_dist,k_range,seq_weights)
-    
-    df_statstics <- cluster_stats$clustering
-    clus_stats_name <- paste0("hclust_cluster_stats_",tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range))
-    write.csv(df_statstics,file=paste0(clusters_dir,"/",clus_stats_name,".csv"))
-    
-    png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_zcore.png'), width = 560, height = 474, res = 99)
-    plot(cluster_stats, norm = "zscore", withlegend = F)
-    dev.off()
-
-    png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_ASW_CH.png'), width = 560, height = 474, res = 99)
-    par(mfrow=c(1:2))
-    plot(cluster_stats$stats$ASW, type='l',col=2, withlegend = F, main="ASW")
-    plot(cluster_stats$stats$CH, type='l',col=2, withlegend = F, main="CH")
-    dev.off()
-    
-    summary(cluster_stats, max.rank = 2)
-    
-  }
-  
 }
 
 cluster_sequences <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", seq_dist_method="LCS",cluster_method="PAM",n_cluster, writeraster_cluster=FALSE){
@@ -277,17 +132,24 @@ cluster_sequences <- function(tyear, lc_target_years, sub_cost_method="CONSTANT"
   }else{
     print("Seq dist file does not exist")
   }
-  
-  if (cluster_method == 'PAM'){
+
+  if (startsWith(cluster_method,'WC')){
   ## Cluster sequences
-    clusters_out <- pam_clustering(seq_dist,seq_weights,n_cluster,cluster_method)
-    clusters_n <-  clusters_out$clustering
+    clusters_out <- wc_clustering(seq_dist,seq_weights,n_cluster,cluster_method)
+    #clusters_n <-  clusters_out$
+    clusters_n <-  clusters_out
+
   } else{
     ## Cluster based on OM transition rates
     clusters_out <- hclust(as.dist(seq_dist),method="ward.D", members=seq_weights)
     # plot(clusterward)
     clusters_n <- cutree(clusters_out, k = n_cluster)
+    
+    data.hc <- clusterboot(seq_dist, B=10, distances = TRUE, clustermethod = disthclustCBI, method =
+                             "ward.D", k = n_cluster)
+    
   }
+  
   
   unique_seq$clusters <- clusters_n
   
@@ -329,7 +191,7 @@ cluster_sequences <- function(tyear, lc_target_years, sub_cost_method="CONSTANT"
   
 }
 
-pam_clustering <- function(seq_dist,seq_wts,k,cluster_method,seed=1729){
+wc_clustering <- function(seq_dist,seq_wts,k,cluster_method,seed=1729){
   # Clustering of the distance matrix using PAM/k-medoids alogirthm
   
   # Parameters:
@@ -338,18 +200,18 @@ pam_clustering <- function(seq_dist,seq_wts,k,cluster_method,seed=1729){
   # Returns:
   # cluster_pam: PAM cluster object which contains medoid IDs, cluster labels, etc.
   set.seed(seed)
-  if (cluster_method=="PAM"){
-    cluster_pam <- pam(seq_dist, k=k, diss = TRUE)
-  }else{
-    cluster_pam <- wcKMedoids(seq_dist,weights=seq_wts,k=k,cluster.only=TRUE,npass=5)
-  }
+
+  if (cluster_method == "WCPAMOnce"){
+    cluster_out <- wcKMedoids(seq_dist,weights=seq_wts,k=k,cluster.only=TRUE,npass=5, method="PAMonce")
+  } else if (cluster_method == "WCKMedoids") {
+    cluster_out <- wcKMedoids(seq_dist,weights=seq_wts,k=k,cluster.only=TRUE,npass=5, method="KMedoids")
+  } 
   
-  return (cluster_pam)
+  return (cluster_out)
 }
 
 find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONSTANT", seq_dist_method="LCS", bcluster="medoids", k_range){
-  # find_optimal_clusters <- function(tyear, lc_target_years, distances_dir){
-  
+
   ##analysis
   infile <- paste0(indir,'/','resultsseq_tyear_',as.character(tyear),'_simple.rdata')
   
@@ -360,8 +222,9 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
   
   yearls <- paste0(as.character(seq(lc_target_years[1],lc_target_years[2],1)))
   
-  ##determine start year
+  ##determine start/end year
   start_idx <- 2 + (which(yearls == tyear)-2)
+  end_idx <- 2 + (which(yearls == tyear)+2)
   
   global_classes <- c('Barren',
                       'Water Bodies',
@@ -379,7 +242,7 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
   global_colors = c('#f9ffa4', 
                     '#1c0dff', '#fa0000', 
                     '#003f00', '#006c00', 
-                    '#f096ff', 
+                    '#db00ff', 
                     '#dcd159') 
   
   global_features <- c(1,
@@ -389,7 +252,7 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
                        5)
   
   classes <- c()
-  for (year in start_idx:(length(yearls)+2)){
+  for (year in start_idx:end_idx){
     classes <- unique(c(classes,tab[,year]))
   }
   
@@ -399,11 +262,16 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
   
   alphabet <- sort(classes)
   
-  start_idx <- 2 + (which(yearls == tyear)-2)
-  
-  tab.seq <- seqdef(tab, start_idx:(length(yearls)+2), alphabet = alphabet, states = target_short,
+  ##only analyse those with DF 2yrs before/after target
+  tab.lag <- seqdef(tab, start_idx:end_idx, alphabet = alphabet, states = target_short,
                     cpal = target_colors, labels = target_short, with.missing = TRUE)
   
+  tabe.seq <- seqecreate(tab.lag, use.labels = FALSE)
+  lc <- seqecontain(tabe.seq, event.list = c("DF"))
+  tab <- tab[lc,]
+  
+  print(paste0('Dimensions ori data: ', dim(tab)[1]))
+
   #create stratas
   std.df <- apply(tab[,start_idx:(dim(tab)[2]-1)], 1, sd) 
   
@@ -411,6 +279,19 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
   tab.nonstable = tab[std.df!=0,]
   
   tab.target = tab.nonstable
+  
+  print(paste0('Dimensions target data: ', dim(tab.target)[1]))
+  
+  classes <- c()
+  for (year in start_idx:(length(yearls)+2)){
+    classes <- unique(c(classes,tab.target[,year]))
+  }
+  
+  target_classes <- global_classes[sort(classes)]
+  target_short <- global_shortclasses[sort(classes)]
+  target_colors <- global_colors[sort(classes)]
+  
+  alphabet <- sort(classes)
   
   seq_object_all <- seqdef(tab.target, start_idx:(length(yearls)+2), alphabet = alphabet, states = target_short,
                            cpal = target_colors, labels = target_short)
@@ -444,7 +325,6 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
       seq_dist <- seqdist(seq_obj, method = "OM",indel = seq_subcost$indel, sm = seq_subcost$sm,with.missing = F)
     } else if(sub_cost_method == "FEATURES"){
       target_classes <- global_features[sort(classes)]
-      print(target_classes)
       tab_state_features <- data.frame(state=target_classes)
       
       seq_subcost <- seqcost(seq_obj, method = "FEATURES",with.missing = FALSE, state.features = tab_state_features)
@@ -475,21 +355,33 @@ find_optimal_clusters <- function(tyear, lc_target_years, sub_cost_method="CONST
   } else{
     cluster_stats <- evaluate_cluster_stats_hclust(seq_dist,k_range,seq_weights)
     
-    df_statstics <- cluster_stats$clustering
+    df_statstics <- cluster_stats$stats
     clus_stats_name <- paste0("hclust_cluster_stats_",tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range))
     write.csv(df_statstics,file=paste0(clusters_dir,"/",clus_stats_name,".csv"))
     
     png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_zcore.png'), width = 560, height = 474, res = 99)
-    plot(cluster_stats, norm = "zscore", withlegend = F)
-    dev.off()
-    
-    png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_ASW_CH.png'), width = 560, height = 474, res = 99)
     par(mfrow=c(1:2))
-    plot(cluster_stats$stats$ASW, type='l',col=2, withlegend = F, main="ASW")
-    plot(cluster_stats$stats$CH, type='l',col=2, withlegend = F, main="CH")
+    plot(x=k_range,y=df_statstics$ASW,type='l',col=2,main="ASW")
+    plot(x=k_range,y=df_statstics$PBC,type='l',col=2,main="PBC")
+    #plot(x=k_range,y=df_statstics$HC,type='l',col=2,main="HC")
     dev.off()
     
-    summary(cluster_stats, max.rank = 2)
+    # 
+    # df_statstics <- cluster_stats$clustering
+    # clus_stats_name <- paste0("hclust_cluster_stats_",tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range))
+    # write.csv(df_statstics,file=paste0(clusters_dir,"/",clus_stats_name,".csv"))
+    # 
+    # png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_zcore.png'), width = 560, height = 474, res = 99)
+    # plot(cluster_stats, norm = "zscore", withlegend = F)
+    # dev.off()
+    # 
+    # png(file = paste0(clusters_dir,'/hclust_cluster_statistics_',tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range),'_ASW_CH.png'), width = 560, height = 474, res = 99)
+    # par(mfrow=c(1:2))
+    # plot(cluster_stats$stats$ASW, type='l',col=2, withlegend = F, main="ASW")
+    # plot(cluster_stats$stats$CH, type='l',col=2, withlegend = F, main="CH")
+    # dev.off()
+    # 
+    # summary(cluster_stats, max.rank = 2)
     
   }
   
@@ -504,10 +396,10 @@ library(plyr)
 library(rlist)
 library(dplyr)
 library(WeightedCluster)
+library(fpc) # load the fpc package for bootstrapping
 
 ##settings
 tile <- 'AMZ'
-tyear <- 2004
 lc_target_years <-c(2001,2019)
 
 #dirs
@@ -536,10 +428,10 @@ for (j in targetyears){
 ##implement cluster##
 targetyears = c(2004:2004)
 
-cluster_method="WARD"
+cluster_method="WARD" #WCPAMOnce WARD 
 sub_cost_method = "TRATE"
-seq_dist_method = "OM"
-n_cluster=6
+seq_dist_metod = "OM"
+n_cluster=15
 
 for (j in targetyears){
   tyear <- j
