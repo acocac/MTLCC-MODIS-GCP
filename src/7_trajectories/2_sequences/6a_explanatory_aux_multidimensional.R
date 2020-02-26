@@ -8,6 +8,7 @@ library(ggeffects)
 library(ggplot2)
 library(ggfortify)
 library(vegan)
+library(WeightedCluster)
 
 tile <- 'AMZ'
 lc_target_years <-c(2001,2019)
@@ -25,15 +26,21 @@ dir.create(seqdata_dir, showWarnings = FALSE, recursive = T)
 
 fn <- 'db_WARD_clustersk8_2004_TRATE_OM.rdata'
 load(paste0(explanatory_dir,'/',fn))
-aux_target <- x[[1]]
+aux_unique <- x[[2]]
 
-fn <- '2007_TRATE_OM.RSav'
+fn <- '2004_TRATE_OM.RSav'
 load(paste0(seqdist_dir,'/',fn))
 
-fn <- '2007_unique_seq.RSav'
+fn <- '2004_unique_seq.RSav'
 load(paste0(seqdata_dir,'/',fn))
 seq_weights <- attr(seq_object,"weights")
 
+aux_unique$slopeK2 <-cut(aux_unique$slope, c(-1,6,max(aux_unique$slope, na.rm = TRUE)))
+
+da1 <- dissassoc(seq_dist, weights=seq_weights, group = aux_unique$slopeK2, R = 50, weight.permutation="diss")
+print(da1$stat)
+
+dt<- disstree(seq_dist ~ male +cohort1 +cohort2 +cohort3 +cohort4 +red +black +fedu +medu +primary +middle +high +minor +party+ loc1+ loc2+ loc3+ loc4+ loc5+ loc6, data=all, R=100) #here the dummy variables are forbidden
 
 
 ##weighted MDS
