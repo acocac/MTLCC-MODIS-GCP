@@ -6,29 +6,36 @@ rm(list = ls())
 
 ##functions
 create_sequence_object <- function(target_period, maxseq){
-  
-  fn <- paste0(target_period,'_unique_tb.RSav')
-  load(paste0(seqdata_dir,'/',fn))
-  
-  fn <- paste0(target_period,'_unique_seq.RSav')
-  load(paste0(seqdata_dir,'/',fn))
-  seq_weights <- attr(seq_object,"weights")
+  # 
+  # fn <- paste0(target_period,'_unique_tb.RSav')
+  # load(paste0(seqdata_dir,'/',fn))
+  # 
+  # fn <- paste0(target_period,'_unique_seq.RSav')
+  # load(paste0(seqdata_dir,'/',fn))
+  # seq_weights <- attr(seq_object,"weights")
   
   fn <- paste0(target_period,'_target_tb.RSav')
   load(paste0(seqdata_dir,'/',fn))
-
-  target_tb_subset = target_tb[,0:(maxseq+2)]
-  target_tb_subset <- target_tb_subset[complete.cases(target_tb_subset),]
+  
+  target_tb_subset_all = target_tb[,0:(maxseq+2)]
+  target_tb_subset_all <- target_tb_subset_all[complete.cases(target_tb_subset_all),]
+  
+  print(paste0('Dimensions ori data: ', dim(target_tb_subset_all)[1]))
+  
+  #create stratas
+  std.df <- apply(target_tb_subset_all[,3:dim(target_tb_subset_all)[2]], 1, sd) 
+  
+  target_tb_subset = target_tb_subset_all[std.df!=0,]
+  
+  print(paste0('Dimensions analysed data: ', dim(target_tb_subset)[1]))
   
   tyear = paste0(target_period,'_minperiod',maxseq)
   
-  unique_seq$seq_length <- seqlength(seq_object)
-  unique_seq_subset <- unique_seq[seq_length >= maxseq, 0:(maxseq+2)]
+  agg_seq_subset <- wcAggregateCases(target_tb_subset[,3:dim(target_tb_subset)[2]])
   
-  idx_subset <- which(unique_seq$seq_length >= maxseq)
-  seq_weights_subset <- seq_weights[idx_subset]
+  unique_seq_subset <- target_tb_subset[agg_seq_subset$aggIndex, ]
   
-  classes = unique(as.vector(as.matrix(unique_seq_subset[,3:(maxseq+2)])))
+  classes = unique(as.vector(as.matrix(unique_seq_subset[,3:dim(unique_seq_subset)[2]])))
   
   target_classes <- global_classes[sort(classes)]
   target_short <- global_shortclasses[sort(classes)]
@@ -36,7 +43,7 @@ create_sequence_object <- function(target_period, maxseq){
   
   alphabet <- sort(classes)
   
-  seq_object_subset <- seqdef(unique_seq_subset, 3:(dim(unique_seq_subset)[2]), weights = seq_weights_subset, alphabet = alphabet, states = target_short, cpal = target_colors,with.missing = TRUE)
+  seq_obj <- seqdef(unique_seq_subset, 3:dim(unique_seq_subset)[2], weights = agg_seq_subset$aggWeights, alphabet = alphabet, states = target_short, cpal = target_colors,with.missing = TRUE)
   
   ## save target matrix
   file_name <- paste0(tyear,'_target_tb')
@@ -56,10 +63,10 @@ create_sequence_object <- function(target_period, maxseq){
   file_name <- paste0(tyear,'_unique_seq')
   file_path <- paste0(seqdata_dir,'/',file_name)
   if(!file.exists(paste0(file_path,".RSav"))){
-    save(seq_object_subset, file=paste0(file_path,".RSav"))
+    save(seq_obj, file=paste0(file_path,".RSav"))
   }
   
-  return(seq_object_subset)
+  return(seq_obj)
   
 }
 
@@ -154,9 +161,9 @@ find_optimal_clusters <- function(target_period, maxseq, sub_cost_method="CONSTA
     seq_weights <- attr(seq_obj,"weights")
   }else{
     print("Seq file does not exist")
-    seq_object <- create_sequence_object(target_period, maxseq)
+    seq_obj <- create_sequence_object(target_period, maxseq)
   }
-  seq_weights <- attr(seq_object,"weights")
+  seq_weights <- attr(seq_obj,"weights")
 
   ## Load distance matrix
   file_name <- paste0(tyear,'_',sub_cost_method,'_',seq_dist_method)
@@ -209,6 +216,8 @@ find_optimal_clusters <- function(target_period, maxseq, sub_cost_method="CONSTA
     plot(x=k_range,y=df_statstics$PBC,type='l',col=2,main="PBC")
     #plot(x=k_range,y=df_statstics$HC,type='l',col=2,main="HC")
     dev.off()
+    
+    return(df_statstics)
 
   # df_statstics <- cluster_stats$clustering
   # clus_stats_name <- paste0("hclust_cluster_stats_",tyear,'_',sub_cost_method,'_',seq_dist_method,'_k_',min(k_range),'_to_',max(k_range))
@@ -255,9 +264,8 @@ cluster_sequences <- function(target_period, maxseq, sub_cost_method="CONSTANT",
   load(file=paste0(target_unique_tb,".RSav"))
   
   load(file=paste0(target_unique_seq,".RSav"))
-  seq_weights <- attr(seq_object_subset,"weights")
+  seq_weights <- attr(seq_obj,"weights")
   
-  print(seq_dist_method)
   seq_dist_name <- paste0(tyear,'_',sub_cost_method,'_',seq_dist_method)
   seq_dist_path <- paste0(seqdist_dir,'/',seq_dist_name)
   
@@ -282,17 +290,17 @@ cluster_sequences <- function(target_period, maxseq, sub_cost_method="CONSTANT",
 
     clus_stability_name <- paste0(cluster_method,"_clustersk",as.character(n_cluster),"_",seq_dist_name,"_stability_cluster")
     
-    if(file.exists(paste0(clus_stability_name,".csv"))){
-      load(paste0(clus_stability_name,".csv"))
+    if(file.exists(paste0(clus_stability_name,".RSav"))){
+      load(paste0(clus_stability_name,".RSav"))
+      print(clusters_stability)
+      
     } else{
       clusters_stability <- clusterboot(seq_dist, B=10, distances = TRUE, clustermethod = disthclustCBI, method =
                                           "ward.D", k = n_cluster)
       
       print(clusters_stability)
-      stability_results <- clusters_stability$result
-      write.csv(stability_results,file=paste0(clusters_dir,"/",clus_stability_name,".csv"))
-      
-      file_path <- paste0(clusters_dir,"/",clus_stability_name))
+
+      file_path <- paste0(clusters_dir,"/",clus_stability_name)
       if(!file.exists(paste0(file_path,".RSav"))){
         save(clusters_stability, file=paste0(file_path,".RSav"))
       }
@@ -315,7 +323,7 @@ cluster_sequences <- function(target_period, maxseq, sub_cost_method="CONSTANT",
   # Plot all the sequences within each cluster 
   graphics.off()
   png(file = paste0(clusters_dir,"/",cluster_method,"_clustersk",as.character(n_cluster),"_",seq_dist_name,".png"), width = 500, height = 1200, res = 100)
-  seqIplot(seq_object_subset, group = unique_seq_subset$clusters, sortv = "from.start", with.legend = F)
+  seqIplot(seq_obj, group = unique_seq_subset$clusters, sortv = "from.start", with.legend = F)
   dev.off()
   
   ## save target seq
@@ -362,6 +370,9 @@ library(rlist)
 library(dplyr)
 library(WeightedCluster)
 library(fpc) # load the fpc package for bootstrapping
+library(future.apply)
+library(hrbrthemes)
+library(viridis)
 
 ##settings
 tile <- 'AMZ'
@@ -376,6 +387,8 @@ seqdata_dir <- paste0("E:/acocac/research/",tile,"/trajectories/sequence_datav2"
 dir.create(seqdata_dir, showWarnings = FALSE, recursive = T)
 clusters_dir <- paste0("E:/acocac/research/",tile,"/trajectories/clustersv2")
 dir.create(clusters_dir, showWarnings = FALSE, recursive = T)
+charts_dir <- paste0("E:/acocac/research/",tile,"/trajectories/chartsv2")
+dir.create(charts_dir, showWarnings = FALSE, recursive = T)
 
 global_classes <- c('Barren',
                     'Water Bodies',
@@ -397,16 +410,48 @@ global_colors = c('#f9ffa4',
                   '#dcd159') 
 
 ##start###
+plan(multiprocess, workers = 13) ## Parallelize using four cores
+set.seed(123)
+
 targetyears = c(2004:2016)
 
 target_period = paste0(min(targetyears),'-',max(targetyears))  
-minperiod = 12 
+minperiods = seq(6,16,2) 
 
 bcluster <- 'hclust' #hclust
 sub_cost_method = "TRATE"
 seq_dist_method = "OM"
 
-find_optimal_clusters(target_period, minperiod, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,bcluster=bcluster,2:10)
+metrics_run <- function(i) {
+  clusters_metrics =find_optimal_clusters(target_period, i, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,bcluster=bcluster,2:10)
+  clusters_metrics$minper = i
+  clusters_metrics$cluster = 2:(nrow(clusters_metrics)+1)
+  return(clusters_metrics)
+}
+
+metrics_all = future.apply::future_lapply(minperiods, FUN = metrics_run, future.seed = TRUE)
+
+final_tb <- rbindlist(metrics_all, fill=TRUE)
+
+shortname <- c('ASW','HC','PBC')
+titles <- c('Average Silhouette Width (ASW)','Hubert's C index (HC)','Point Bi-serial Correlation (PBC) ')
+
+for (i in 1:length(shortname)){
+  
+  png(file = paste0(charts_dir,"/",shortname[i],".png"), width = 850, height = 850, res = 150)
+  p <- ggplot2::ggplot(final_tb, aes_string(x="minper", y="cluster", size=shortname[i])) +
+    geom_point(shape=21, color="black", fill = "black") +
+    scale_size(name="", range=c(0,10))  +
+    theme_ipsum_rc(axis_title_size = 18, base_size=17) +
+    theme(legend.position="bottom") +
+    labs(x="Minimum period", y="Number of clusters",
+         title=titles[i]) +
+    theme(legend.text=element_text(size=16)) +
+      theme(panel.grid = element_blank(),
+            panel.border = element_blank())
+  print(p)
+  dev.off()
+}
 
 ##implement cluster##
 targetyears = c(2004:2016)
@@ -417,9 +462,10 @@ minperiod = 12
 cluster_method="WARD" #WCPAMOnce WARD 
 sub_cost_method = "TRATE"
 seq_dist_method = "OM"
-n_cluster=7
-n_clusters = c(3,4,5,6,8,9,10)
+
+n_clusters = c(5:5)
+wraster = FALSE
 
 for (n_cluster in n_clusters){
-  cluster_sequences(target_period, minperiod, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,cluster_method=cluster_method,n_cluster=n_cluster, writeraster_cluster=TRUE)
+  cluster_sequences(target_period, minperiod, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,cluster_method=cluster_method,n_cluster=n_cluster, writeraster_cluster=wraster)
 }
