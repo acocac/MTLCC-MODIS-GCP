@@ -337,7 +337,7 @@ cluster_sequences <- function(target_period, maxseq, sub_cost_method="CONSTANT",
   
   ##merge clusters
   cluster_all <- target_tb_subset %>%
-    left_join(select(unique_seq_subset, clusters, sec), by = "sec")
+    left_join(dplyr::select(unique_seq_subset, clusters, sec), by = "sec")
 
   file_path <- paste0(clusters_dir,'/',cluster_method,"_clustersk",as.character(n_cluster),"_",seq_dist_name,"_target")
   if(!file.exists(paste0(file_path,".RSav"))){
@@ -434,7 +434,7 @@ metrics_all = future.apply::future_lapply(minperiods, FUN = metrics_run, future.
 final_tb <- rbindlist(metrics_all, fill=TRUE)
 
 shortname <- c('ASW','HC','PBC')
-titles <- c('Average Silhouette Width (ASW)','Hubert's C index (HC)','Point Bi-serial Correlation (PBC) ')
+titles <- c('Average Silhouette Width (ASW)','Huberts C index (HC)','Point Bi-serial Correlation (PBC)')
 
 for (i in 1:length(shortname)){
   
@@ -457,14 +457,14 @@ for (i in 1:length(shortname)){
 targetyears = c(2004:2016)
 
 target_period = paste0(min(targetyears),'-',max(targetyears))  
-minperiod = 14
+minperiod = 12
 
 cluster_method="WARD" #WCPAMOnce WARD 
 sub_cost_method = "TRATE"
 seq_dist_method = "OM"
 
 n_clusters = c(6:6)
-wraster = FALSE
+wraster = TRUE
 
 for (n_cluster in n_clusters){
   cluster_sequences(target_period, minperiod, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,cluster_method=cluster_method,n_cluster=n_cluster, writeraster_cluster=wraster)

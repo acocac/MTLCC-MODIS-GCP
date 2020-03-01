@@ -27,20 +27,6 @@ dir.create(seqdata_dir, showWarnings = FALSE, recursive = T)
 aux_dir <- "F:/acoca/research/gee/dataset/AMZ/implementation"
 proj <- CRS('+proj=longlat +ellps=WGS84')
 
-access <- raster(paste0(aux_dir,'/ancillary/processed/external/access.tif'))
-dem <- raster(paste0(aux_dir,'/ancillary/processed/external/srtm.tif'))
-slope <- raster(paste0(aux_dir,'/ancillary/processed/external/slope.tif'))
-precipitation <- raster(paste0(aux_dir,'/ancillary/processed/external/bio12.tif'))
-pas_conservation <- raster(paste0(aux_dir,'/ancillary/processed/external/distance_PAs_conservation_AMZ.tif'))
-pas_exploitation <- raster(paste0(aux_dir,'/ancillary/processed/external/distance_PAs_exploitation_AMZ.tif'))
-
-c1 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c1.tif'))
-c2 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c2.tif'))
-c3 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c3.tif'))
-c4 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c4.tif'))
-c5 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c5.tif'))
-c6 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c6.tif'))
-
 ###start process
 fn <- 'WARD_clustersk6_2004-2016_minperiod12_TRATE_OM_target.RSav'
 
@@ -52,12 +38,25 @@ if(file.exists(paste0(file_path))){
 } else{
   load(paste0(clusters_dir,'/',fn))
 
+  access <- raster(paste0(aux_dir,'/ancillary/processed/external/access.tif'))
+  dem <- raster(paste0(aux_dir,'/ancillary/processed/external/srtm.tif'))
+  slope <- raster(paste0(aux_dir,'/ancillary/processed/external/slope.tif'))
+  precipitation <- raster(paste0(aux_dir,'/ancillary/processed/external/bio12.tif'))
+  pas_conservation <- raster(paste0(aux_dir,'/ancillary/processed/external/distance_PAs_conservation_AMZ.tif'))
+  pas_exploitation <- raster(paste0(aux_dir,'/ancillary/processed/external/distance_PAs_exploitation_AMZ.tif'))
+
+  c1 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c1.tif'))
+  c2 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c2.tif'))
+  c3 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c3.tif'))
+  c4 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c4.tif'))
+  c5 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c5.tif'))
+  c6 <- raster(paste0(aux_dir,'/ancillary/processed/internal/distance_c6.tif'))
+
   ##extract raster values
   ##add and prepare aux columns
   tab.target_geo = cluster_all
   coordinates(tab.target_geo) <- c("x", "y")
   mypoints = SpatialPoints(tab.target_geo,proj4string = CRS("+init=epsg:4326"))
-
 
   #external
   dem_val =raster::extract(dem, mypoints)
@@ -75,12 +74,22 @@ if(file.exists(paste0(file_path))){
   c5_val =raster::extract(c5, mypoints)
   c6_val =raster::extract(c6, mypoints)
 
+  #external values
   tab.target_geo$access = (access_val)/(60*24)
   tab.target_geo$dem = dem_val
   tab.target_geo$slope = slope_val
   tab.target_geo$prec = prec_val
   tab.target_geo$pascon = (pascon_val * 231.91560544825498) / 1000
   tab.target_geo$pasexp = (pasexp_val * 231.91560544825498) / 1000
+
+  #internal values
+  tab.target_geo$c1 = (c1_val * 231.91560544825498) / 1000
+  tab.target_geo$c2 = (c2_val * 231.91560544825498) / 1000
+  tab.target_geo$c3 = (c3_val * 231.91560544825498) / 1000
+  tab.target_geo$c4 = (c4_val * 231.91560544825498) / 1000
+  tab.target_geo$c5 = (c5_val * 231.91560544825498) / 1000
+  tab.target_geo$c6 = (c6_val * 231.91560544825498) / 1000
+
 
   save(tab.target_geo, file=paste0(file_path))
 }
@@ -99,8 +108,8 @@ group <- factor(
   c("1", "2", "3", "4", "5", "6")
 )
 
-tab.target_df = as.data.frame(tab.target_geo)
-
+tab.target_df2 = as.data.frame(tab.target_geo)
+rm(tab.target_geo)
 final_df = data.frame(group, tab.target_df[,23:28])
 final_df = final_df[complete.cases(final_df),]
 names(final_df)
