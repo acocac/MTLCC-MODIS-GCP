@@ -74,19 +74,64 @@ predict_parallelP <- function(j, sel, varn, formulaString, rmatrix, idcol, metho
     
     pred <- predict(gm, s.test, na.action = na.pass)$predictions 
   }
-  if(method=="party"){
-    gm <- cforest(formulaString, data=s.train, control = cforest_unbiased(mtry = 2, ntree = 85))
-    #saveRDS(gm, file=paste0(outdir,"/","ranger_mRF_", varn,".RData"), compress=T, version=3.5.0)
-    save(gm, file=paste0(outdir,"/","party_mRF_", varn,"_model.RData"))
-
-    pred <- party::predict(gm, s.test, type="response")
-    print(pred)
+  if(method=="rfe"){
+    keep_vars <- drop_vars <- test_perf <- train_perf <- npred <- NULL
+    for(j in 1:length(subsets)){
+      
+      #define new training data
+      #except for first iteration, where the full data set ist used
+      if(exists("newtrain")) {train = newtrain}
+      
+      #Verbose iter
+      print(paste("==> subset size = ", length(s.train)-1, sep = ""))
+      
+      
+      #define model to fit
+      formula <- as.formula(paste(response, " ~ .", sep = ""))
+      
+      #tune/train random forest
+      fit <- ranger(formula, data=s.train, write.forest=TRUE, num.trees=85, importance="permutation")
+      
+      train_perf[j] <- fit
+      #get test accuracy
+      test_perf[j] <- get_acc(fit, s.test)
+      
+      #number of preds used
+      npred[[j]] <- length(s.train)-1
+      
+      #extract retained variables
+      #assign ranks
+      #define reduced training data set
+      if(j < length(subsets)){
+        #extract top variables to keep for next iteration
+        keep_vars[[j]] <- varImp(fit)$importance %>% 
+          tibble::rownames_to_column() %>% 
+          as_tibble() %>% dplyr::rename(var = rowname) %>%
+          arrange(desc(Overall)) %>% slice(1:subsets[j+1]) %>% pull(var)
+        #extract variables dropped from dataset
+        drop_vars[[j]] <- names(train)[!names(train) %in% c(keep_vars[[j]], response)] %>% 
+          tibble::enframe() %>% mutate(rank = length(subsets)-j+1) %>% 
+          dplyr::select(value, rank) %>% dplyr::rename(var = value)
+        #define new training data
+        newtrain <- dplyr::select(s.train, response, keep_vars[[j]])
+        #last iteration
+      } else {
+        drop_vars[[j]] <- names(s.train)[names(s.train) != response] %>% 
+          tibble::enframe() %>% mutate(rank = length(subsets)-j+1) %>% 
+          dplyr::select(value, rank) %>% rename(var = value)
+      }
+    } #END OF FEATURE ELIMINATION ON RESAMPLE i
+    #clean environment 
+    ranks <- drop_vars %>% do.call("rbind", .)
+    out <- list(ranks, train_perf, test_perf, npred)
+    return(out)
+    rm("newtrain")
   }
-  obs.pred <- as.data.frame(list(s.test[,varn], pred))
-  names(obs.pred) = c("Observed", "Predicted")
-  obs.pred[,idcol] <- s.test[,idcol]
-  obs.pred$fold = j
-  return(obs.pred)
+  # obs.pred <- as.data.frame(list(s.test[,varn], pred))
+  # names(obs.pred) = c("Observed", "Predicted")
+  # obs.pred[,idcol] <- s.test[,idcol]
+  # obs.pred$fold = j
+  # return(obs.pred)
 }
 
 cv_numeric <- function(formulaString, rmatrix, nfold, idcol, cpus, method="ranger", Log=FALSE, LLO=TRUE, outdir){     
@@ -274,31 +319,10 @@ if(file.exists(paste0(file_path))){
   save(tab.target_geo, file=paste0(file_path))
 }
 
-startP = 'load'
 
-if (start = 'raw'){
-  tab.target_df = as.data.frame(tab.target_geo)
-  
-  group <- factor(
-    tab.target_geo$clusters,
-    c(1, 2, 3, 4, 5, 6),
-    c("t1", "t2", "t3", "t4", "t5", "t6")
-  )
-  
-  final_df = data.frame(group, tab.target_df[,17:28])
-  
-}
-
-explanatory_ext <- c('access','dem','slope','prec','pascon','pasexp')
-explanatory_int <- c('c1','c2','c3','c4','c5','c6')
-
-# This code can be repeated for all soil properties - 2 soil properties provided here
-cov <- c('access','dem','slope','prec','pascon','pasexp')
-cov <-explanatory_int
-
-
-formulaStringClay = as.formula(paste('group ~', paste(cov, collapse="+")))
-df.target <- final_df[,all.vars(formulaStringClay)]
+file_name <- paste0("target_RF.RData")
+file_path <- paste0(explanatory_dir,'/',file_name)
+load(file_path)
 
 #### Run cross validation ####
 results_cv <- cv_numeric(formulaStringClay, df.target, nfold=10, idcol="group",outdir=explanatory_dir)
