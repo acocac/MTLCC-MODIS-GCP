@@ -457,14 +457,14 @@ for (i in 1:length(shortname)){
 targetyears = c(2004:2016)
 
 target_period = paste0(min(targetyears),'-',max(targetyears))  
-minperiod = 12
+minperiod = 16
 
 cluster_method="WARD" #WCPAMOnce WARD 
 sub_cost_method = "TRATE"
 seq_dist_method = "OM"
 
 n_clusters = c(6:6)
-wraster = TRUE
+wraster = FALSE
 
 for (n_cluster in n_clusters){
   cluster_sequences(target_period, minperiod, sub_cost_method=sub_cost_method,seq_dist_method=seq_dist_method,cluster_method=cluster_method,n_cluster=n_cluster, writeraster_cluster=wraster)

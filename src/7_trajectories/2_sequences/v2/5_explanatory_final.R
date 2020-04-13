@@ -267,10 +267,10 @@ data = data.frame(data$group, data[,explanatory_ext])
 #
 
 # The candidate set of the number of predictors to evaluate
-subsets <- c(length(data),10,8,6,4,2)
+subsets <- c(12:1)
 
 classifiers <- c('ranger')
-CV = 15
+CV = 30
 
 for (c in classifiers){
   print(c)
@@ -289,7 +289,7 @@ for (c in classifiers){
                      importance = "permutation",
                      num.trees = 100)
   
-  file_name <- paste0("rfe_",c,"_",CV,"CV_target_all_excT1.RData")
+  file_name <- paste0("rfe_",c,"_",CV,"CV_target_all_excT1_12to1.RData")
   file_path <- paste0(explanatory_dir,'/',file_name)
   
   save(rfe, file=paste0(file_path))
@@ -301,13 +301,13 @@ for (c in classifiers){
 c <- 'ranger'
 CV <- 30
 
-file_name <- paste0("rfe_",c,"_",CV,"CV_target_all.RData")
+file_name <- paste0("rfe_",c,"_",CV,"CV_target_all_excT1_12to1.RData")
 file_path <- paste0(explanatory_dir,'/',file_name)
 load(paste0(explanatory_dir,'/',file_name))
 
 out <- tidy_rfe_output(rfe, "RF")
 PROF <- plot_perf_profile(out[[1]])
-
+PROF
 p1_multinom <- PROF
 p2_rf <- PROF
 
@@ -318,5 +318,9 @@ png(file = paste0(charts_dir,"/RFE_comparison_all.png"), width = 1700, height = 
 print(final_plot)
 dev.off()
 
+
+png(file = paste0(charts_dir,"/RFE_comparison_exclwater.png"), width = 650, height = 440, res = 60)
+print(PROF)
+dev.off()
 
 

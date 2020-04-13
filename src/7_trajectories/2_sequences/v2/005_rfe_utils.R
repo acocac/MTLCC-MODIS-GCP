@@ -193,15 +193,16 @@ plot_perf_profile <- function(data){
   pd <- position_dodge(0.5) # move them .05 to the left and right
   #plot performance profiles
   ggplot(data, aes(x = subset_size, y = mean, group = set, colour = set)) +
-    geom_point(position = pd) + geom_line() +
-    geom_errorbar(position = pd, aes(ymin = mean - sd, ymax = mean + sd), width = 1, alpha = 0.5) + 
+    geom_point(position = pd) + geom_line(size=1.1) +
+    geom_errorbar(position = pd, aes(ymin = mean - sd, ymax = mean + sd), width = 2, size=1.1, alpha = 0.5) + 
     theme_ipsum_rc(grid='Y',axis_title_size = 22, base_size=17, strip_text_face = "bold", strip_text_size = 24) +
     labs(x="Number of Features", y="\nOverall Accuracy (%) [0-100]\n") + 
-    scale_y_percent(limits = c(0.1, 0.6)) +
-    scale_x_continuous(limits = c(0, 12), expand=c(0,0)) +
+    scale_y_percent(limits = c(0.3, 0.7), breaks=seq(0.3,0.7,0.1)) +
+    #scale_x_continuous(limits = c(0, 14), expand=c(0,0)) +
+    scale_x_continuous(expand=c(0,0), limits=c(0, 14), breaks=seq(0,12,2)) +
     facet_wrap(~algorithm) +
     scale_color_discrete(breaks=c('Train','Test')) +
-    theme(legend.text=element_text(size=24), legend.title = element_blank()) +
+    theme(legend.text=element_text(size=24), legend.title = element_blank(), legend.justification = "top") +
     guides(fill = guide_legend(nrow = 2, ncol=1))
 }
 

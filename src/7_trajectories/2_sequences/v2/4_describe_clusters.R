@@ -42,7 +42,7 @@ global_colors = c('#f9ffa4',
 ####SA - Minimum period####
 ####all period###
 targetyears = c(2004:2016)
-minperiod=12
+minperiod=16
 nclusters=6
   
 tyear = paste0(min(targetyears),'-',max(targetyears))  
