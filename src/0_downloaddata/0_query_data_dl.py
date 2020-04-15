@@ -8,6 +8,9 @@ Example invocation::
         -r 250m
         -y 2009
         -p 384
+        -k 0
+        -s Gcloud
+        -b gs://test
 
 acocac@gmail.com
 """
@@ -27,7 +30,6 @@ parser.add_argument('-p','--psize', type=int, required=True, help='Patch size')
 parser.add_argument('-k','--ksize', type=int, required=False, help='Kernel size', default=0)
 parser.add_argument('-s','--storage', type=str, required=True, help='Gdrive or Gcloud', default=0)
 parser.add_argument('-b','--bucket', type=str, required=False, help='bucket name', default=None)
-parser.add_argument('-a','--aim', type=str, required=False, help='the aim of the input data', default=None)
 
 #Filter pixels by QA
 def maskQAv6(img):

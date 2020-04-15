@@ -9,7 +9,7 @@ mkdir -p $logdir
 echo "Creating subset LC confidences data"
 logfname="${logdir}/crop.log"
 
-python 4_crop_test.py \
+python 4_crop_layers.py \
         --indir="F:/acoca/research/gee/dataset/${project}/prediction/ep15/confidences_stack" \
         --outdir="F:/acoca/research/gee/dataset/${project}/prediction/ep15/confidences_stack_subset" \
         --nworkers $nworkers \

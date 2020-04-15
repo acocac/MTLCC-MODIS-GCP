@@ -1,7 +1,6 @@
 import mtlchmm
 import glob
 import os
-import rasterio
 
 import argparse
 

@@ -6,7 +6,6 @@ import glob
 import re
 from rasterio.mask import mask
 import fiona
-from rasterio.features import sieve
 import sys
 import joblib
 

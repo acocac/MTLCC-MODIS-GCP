@@ -1,10 +1,7 @@
 import os
 import glob
-import re
 import numpy as np
 import rasterio
-import fiona
-from rasterio.mask import mask
 
 import argparse
 
