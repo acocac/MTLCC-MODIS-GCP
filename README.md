@@ -19,7 +19,7 @@ Sequential Recurrent Encoders. ISPRS International Journal of Geo-Information 7(
 * These datasets can be downloaded from Google Earth Engine using GEE python API (see `src/0_downloaddata` and preprocessed according to the scripts in `src/1_datapreparation`. 
 * The partitions for training, validating and evaluating the MTLCC model can be generated using the scripts in `src/2_datapartition`.
 * The original `Tensorflow 1.7` repository located at `https://github.com/TUM-LMF/MTLCC` was forked and adapted to TF 1.14 using tf.Estimator and Google AI structure. The structure of the scripts are according to Google AI as can be found in `src/3_model_mtlcc`.
-* Scripts for training shallow learners (RF/SVM)) models from either Google AI SDK or local training are available in `src/4_shallowlearners`.
+* Scripts for training shallow learners (RF/SVM) models from either Google AI SDK or local training are available in `src/4_shallowlearners`.
 * Scripts for analysing the results and outputs (perfomance metrics) of the trained models from either Google AI SDK or local training are available in `src/5_results`.
 
 ### Instructions
@@ -41,22 +41,6 @@ Finally, thanks to Google, in particular Google Cloud Platform Education Grants 
 
 ### Contributing
 Contributions via pull requests are welcome. Please make sure that changes pass the unit tests. Any bugs and problems can be reported on the repo's issues page.
-
-### Network training and evaluation (in `src/3_model_mtlcc`)
-
-#### on local machine (requires dependencies installed)
-
-#### train the network graph for 24px tiles ()
-```bash
-bash bin/run.train.local.sh
-```
-
-### Monitor training/validation curves
-#### on local machine (requires dependencies installed)
-
-```bash
-tensorboard --logdir=.
-```
 
 Python packages
 ```bash
