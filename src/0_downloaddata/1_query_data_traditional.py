@@ -1,12 +1,16 @@
 """
-Query and export MODIS data into TFRecord format
+Query and export MODIS data into CSV to train shallow learners
 
 Example invocation::
 
-    python 0_downloaddata/1_query_data_traditional.py
+    python 0_downloaddata/1_query_data.py
         -o DIRNAME
-        -y 2001
-        -p train
+        -r MCD12Q1v6stable01to03_LCProp2_major
+        -y 2009
+        -i 3000
+        -f 0
+        -s Gcloud
+        -b gs://test
 
 acocac@gmail.com
 """
@@ -192,7 +196,6 @@ if __name__ == '__main__':
 
     try:
         task.start()
-        ##        print(task.status())
         if storage == 'Gdrive':
             print('Exporting in CSV format {} samples (instances) per class available for period {} to {} and storing into GDrive {} folder'.format(instances, tS, tE,outdir))
         else:

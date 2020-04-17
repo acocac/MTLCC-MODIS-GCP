@@ -1,3 +1,9 @@
+"""
+Query and download in a CSV file a Google AI's jobname
+
+acocac@gmail.com
+"""
+
 from googleapiclient import discovery
 from google.oauth2 import service_account
 import pandas as pd

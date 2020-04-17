@@ -1,5 +1,5 @@
 """
-Query and export MODIS data into TFRecord format
+Query and export MODIS data into TFRecord format to train DL models
 
 Example invocation::
 
@@ -17,7 +17,6 @@ acocac@gmail.com
 
 import ee
 import argparse
-import os
 
 ee.Initialize()
 
@@ -204,7 +203,6 @@ if __name__ == '__main__':
     #land cover maps
     MCD12Q1v6 = 'MODIS/006/MCD12Q1'
     esa_v207 = ee.Image('users/acocac/esacci')
-    # copernicus_v201 = ee.Image('users/acocacbasic/copernicus_AMZ')
     copernicus_dir = 'users/acocacbasic/copernicus'
     copernicus_tiles = ['W060N00','W060N20','W080N00','W080N20']
     copernicus_path = [copernicus_dir + '/' + i for i in copernicus_tiles]
@@ -243,8 +241,6 @@ if __name__ == '__main__':
     else:
         aoi = ee.FeatureCollection('users/acocacbasic/test_aois/tile_1_612')
         sizeGEE = 1000000000
-    # aoi = ee.FeatureCollection('users/acocac/tile4')
-    # aoi = ee.FeatureCollection('users/acocac/thesis/fieldcampaigns/fc1_2004_01_01_2013_04_07')
 
     ##time period
     tS = str(tyear) + '-01-01'
@@ -395,8 +391,6 @@ if __name__ == '__main__':
 
     if res == "500m_spectral":
 
-        # MODIS_BANDS =['sur_refl_b01', 'sur_refl_b02', 'sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'];
-        # DEF_BANDS =['red', 'NIR', 'blue', 'green', 'SWIR1', 'SWIR2', 'SWIR3']
         MODIS_BANDS =['sur_refl_b03', 'sur_refl_b04', 'sur_refl_b05', 'sur_refl_b06', 'sur_refl_b07'];
         DEF_BANDS =['blue', 'green', 'SWIR1', 'SWIR2', 'SWIR3']
 

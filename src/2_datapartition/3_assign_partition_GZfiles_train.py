@@ -9,6 +9,7 @@ Example invocation::
         -p 24
         -b 3
         -f 0
+        -ref MCD12Q1v6raw_LCType1
 
 acocac@gmail.com
 """

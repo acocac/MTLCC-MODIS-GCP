@@ -1,3 +1,18 @@
+"""
+Compute metrics from NPY files
+Example invocation::
+
+    python 5_results/1_metrics.py
+        -i INPUTDIR
+        -o OUTPUTDIR
+        -d MCD12Q1v6stable01to15_LCProp2_major
+        -y 2001
+        -l global
+        -b 1
+
+acocac@gmail.com
+"""
+
 import numpy as np
 import os
 import pandas as pd
@@ -11,7 +26,7 @@ parser = argparse.ArgumentParser(description='Export gee data to visualise in th
 
 parser.add_argument('-i','--indir', type=str, required=True, help='Indir dir')
 parser.add_argument('-o','--outdir', type=str, required=True, help='Outdir dir')
-parser.add_argument('--dataset', type=str, default=None, help='Dataset')
+parser.add_argument('-d','--dataset', type=str, default=None, help='Dataset')
 parser.add_argument('-y','--targetyear', type=str, required=True, help='Target year')
 parser.add_argument('-l','--level', type=str, required=True, help='Level')
 # parser.add_argument('-f','--folds', type=list, required=True, help='Folds')

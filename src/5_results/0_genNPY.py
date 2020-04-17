@@ -1,3 +1,17 @@
+"""
+Gen NPY files from predictions and ground thruth directories
+Example invocation::
+
+    python 5_results/0_genNPY.py
+        --preddir PREDDIR
+        --verdir VERDIR
+        --dataset 2001
+        --bestmodel 1
+        --experiment 0_tl
+
+acocac@gmail.com
+"""
+
 import numpy as np
 import argparse
 import sys

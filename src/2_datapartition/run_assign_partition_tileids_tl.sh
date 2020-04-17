@@ -10,7 +10,7 @@ for reference in ${REFERENCES[@]}; do
         mkdir -p "F:/acoca/research/gee/dataset/${project}/_logs/predict/"
         echo "Processing reference $reference"
         logfname="F:/acoca/research/gee/dataset/${project}/_logs/predict/$reference.log"
-        python 6_assign_partition_GZfiles_transferlearning.py \
+        python 5_assign_partition_GZfiles_transferlearning.py \
             --rootdir="F:/acoca/research/gee/dataset/${project}" \
             --tyear=$year \
             --psize=$psize  \

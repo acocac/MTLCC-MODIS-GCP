@@ -1,5 +1,5 @@
 """
-Merge 250-m and 500-m TFRecord.gz records in single TF records
+Merge 250-m and 500-m TFRecord.gz records into single TF records
 
 Example invocation::
 
@@ -8,7 +8,6 @@ Example invocation::
         -y 2009
         -p 24
         -t 46
-        -d MCD12Q1v6
 
 acocac@gmail.com
 """
@@ -107,8 +106,6 @@ def merge_fn(ds_250m_spectral, ds_500m_spectral, ds_250m_aux, bands_250m_spectra
     ds_250m_spectral = tf.data.TFRecordDataset(ds_250m_spectral, compression_type='GZIP')
     ds_500m_spectral = tf.data.TFRecordDataset(ds_500m_spectral, compression_type='GZIP')
     ds_250m_aux = tf.data.TFRecordDataset(ds_250m_aux, compression_type='GZIP')
-
-    # bands250m_ = bands_250m_spectral + version
 
     # Dictionary with names as keys, features as values.
     featureNames = list(bands_250m_spectral)
@@ -214,8 +211,6 @@ def merge_fn(ds_250m_spectral, ds_500m_spectral, ds_250m_aux, bands_250m_spectra
 
             x500_spectral, year, DOY = iterator500m_spectral.get_next()
             x500_spectral, year, DOY = sess.run([x500_spectral, year, DOY])
-
-            # x250 = np.concatenate((x250_spectral, x250_aux), axis=-1)
 
             parser.write(filepaths[t], x250_spectral, x250_aux, x500_spectral, DOY[0, :], year[0, :], labels, labels_continuous)
 

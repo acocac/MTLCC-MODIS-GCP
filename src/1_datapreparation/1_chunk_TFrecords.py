@@ -10,6 +10,7 @@ Example invocation::
         -p 24
         -d MCD12Q1v6
         -e train
+        -n 4
 
 acocac@gmail.com
 """
